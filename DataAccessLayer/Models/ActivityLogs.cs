@@ -27,5 +27,5 @@ public class ActivityLogs
     public int? SubEntityTypeId { get; set; } = null; 
 
     [ForeignKey("CreatedById")]
-    public virtual User CreatedUser { get; set; }
+    public virtual ApplicationUser CreatedUser { get; set; }
 }

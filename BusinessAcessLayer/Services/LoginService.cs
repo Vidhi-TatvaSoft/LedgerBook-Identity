@@ -38,7 +38,6 @@ public class LoginService : ILoginService
     public async Task<bool> SaveUser(RegistrationViewModel registrationViewModel)
     {
         ApplicationUser userToSaveOrUpdate = _genericRepository.Get<ApplicationUser>(a => a.Email.ToLower() == registrationViewModel.Email.ToLower() && !a.DeletedAt.HasValue);
-        User user = _genericRepository.Get<User>(a => a.Email.ToLower() == registrationViewModel.Email.ToLower() && !a.DeletedAt.HasValue);
         bool existingUser = false;
         if (userToSaveOrUpdate != null)
         {
@@ -47,7 +46,7 @@ public class LoginService : ILoginService
         else
         {
             userToSaveOrUpdate = new();
-            user = new();
+            // user = new();
         }
 
         //add in ApplicationUser
@@ -59,14 +58,6 @@ public class LoginService : ILoginService
         Guid guid = Guid.NewGuid();
         userToSaveOrUpdate.VerificationToken = guid.ToString();
 
-        //add  user
-        user.Email = userToSaveOrUpdate.Email;
-        user.FirstName = userToSaveOrUpdate.FirstName;
-        user.LastName = userToSaveOrUpdate.LastName;
-        user.IsEmailVerified = userToSaveOrUpdate.IsUserRegistered;
-        user.VerificationToken = userToSaveOrUpdate.VerificationToken;
-
-
         if (existingUser)
         {
             userToSaveOrUpdate.IsUserRegistered = true;
@@ -75,12 +66,6 @@ public class LoginService : ILoginService
             IdentityResult result = await _userManager.UpdateAsync(userToSaveOrUpdate);
             if (result.Succeeded)
             {
-                user.IsUserRegistered = userToSaveOrUpdate.IsUserRegistered;
-                user.UpdatedAt = DateTime.UtcNow;
-                user.Password = userToSaveOrUpdate.PasswordHash;
-                user.ApplicationUserId = userToSaveOrUpdate.Id;
-                await _genericRepository.UpdateAsync<User>(user);
-
                 string message = string.Format(Messages.UserActivity, "User", "created");
                 await _activityLogService.SetActivityLog(message, EnumHelper.Actiontype.Add, EnumHelper.ActivityEntityType.User, userToSaveOrUpdate.Id);
                 return true;
@@ -97,12 +82,6 @@ public class LoginService : ILoginService
             IdentityResult result = await _userManager.CreateAsync(userToSaveOrUpdate, registrationViewModel.Password);
             if (result.Succeeded)
             {
-                user.IsUserRegistered = userToSaveOrUpdate.IsUserRegistered;
-                user.CreatedAt = DateTime.UtcNow;
-                user.Password = userToSaveOrUpdate.PasswordHash;
-                user.ApplicationUserId = userToSaveOrUpdate.Id;
-                await _genericRepository.UpdateAsync<User>(user);
-
                 string message = string.Format(Messages.UserActivity, "User", "created");
                 await _activityLogService.SetActivityLog(message, EnumHelper.Actiontype.Add, EnumHelper.ActivityEntityType.User, userToSaveOrUpdate.Id);
                 return true;
@@ -122,16 +101,15 @@ public class LoginService : ILoginService
     public async Task<bool> EmailVerification(string email, string emailToken)
     {
         ApplicationUser user = _genericRepository.Get<ApplicationUser>(x => x.Email.ToLower().Trim() == email.ToLower().Trim() && x.VerificationToken == emailToken && !x.DeletedAt.HasValue)!;
-        User userTemp = _genericRepository.Get<User>(x => x.Email.ToLower().Trim() == email.ToLower().Trim() && x.VerificationToken == emailToken && !x.DeletedAt.HasValue)!;
 
         if (user != null)
         {
             user.IsEmailVerified = true;
+            user.UpdatedAt = DateTime.UtcNow;
+            user.UpdatedById = user.Id;
             IdentityResult result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                userTemp.IsEmailVerified = true;
-                await _genericRepository.UpdateAsync<User>(userTemp);
                 return true;
             }
         }

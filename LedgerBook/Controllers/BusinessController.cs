@@ -55,7 +55,7 @@ public class BusinessController : BaseController
         {
             return redirectResult;
         }
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         string username = user.FirstName + " " + user.LastName;
         return View();
     }
@@ -64,7 +64,7 @@ public class BusinessController : BaseController
     #region get all businesses
     public IActionResult GetBusinesses(string searchText = null)
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         int userId = user.Id;
         List<BusinessViewModel> businessList = _businessService.GetBusinesses(userId, searchText);
         List<BusinessViewModel> businessListRolewise = _businessService.GetRolewiseBusiness(businessList);

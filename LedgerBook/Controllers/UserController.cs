@@ -37,7 +37,7 @@ public class UserController : BaseController
     #region profile index page
     public IActionResult Profile()
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         UserProfileViewModel userProfileViewModel = _userService.GetUserProfile(user.Id);
         return View(userProfileViewModel);
     }
@@ -47,7 +47,7 @@ public class UserController : BaseController
     [HttpPost]
     public async Task<IActionResult> Profile(UserProfileViewModel userProfileViewModel)
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         if (userProfileViewModel.AttachmentViewModel != null)
         {
             if (userProfileViewModel.AttachmentViewModel.BusinessLogo != null)
@@ -75,7 +75,7 @@ public class UserController : BaseController
             userProfileViewModel.AttachmentViewModel = new();
         }
         bool isUserUpdated = await _userService.UpdateUserProfile(userProfileViewModel);
-        User updatedUser = GetCurrentUser();
+        ApplicationUser updatedUser = GetCurrentUserIdentity();
         if (isUserUpdated)
         {
             if (updatedUser.ProfileAttachmentId != null)
@@ -94,8 +94,6 @@ public class UserController : BaseController
             {
                 return RedirectToAction("Index", "Business");
             }
-            return RedirectToAction("Profile");
-
         }
         else
         {
@@ -110,7 +108,7 @@ public class UserController : BaseController
     public async Task<IActionResult> RenderChangePassword()
     {
         ViewResponseModel viewResponseModel = new();
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         ChangePasswordViewModel changePasswordViewModel = new();
         changePasswordViewModel.Email = user.Email;
         return PartialView("_ChangePasswordModalpartial", changePasswordViewModel);
@@ -120,8 +118,7 @@ public class UserController : BaseController
     #region chage password post
     public async Task<IActionResult> ChangePassword(ChangePasswordViewModel changePasswordViewModel)
     {
-        User userTemp = GetCurrentUser();
-        ApplicationUser user = _userService.GetuserByEmail(userTemp.Email);
+        ApplicationUser user = GetCurrentUserIdentity();
 
         if (user != null)
         {

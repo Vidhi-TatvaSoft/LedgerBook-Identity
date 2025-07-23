@@ -134,12 +134,12 @@ public class ActivityLogService : IActivityLogService
 
         foreach (var activity in activityList)
         {
-            User usercreatedBy = _genericRepository.Get<User>(x => x.Id == activity.CreatedById);
+            ApplicationUser usercreatedBy = _genericRepository.Get<ApplicationUser>(x => x.Id == activity.CreatedById);
             activity.createdByName = usercreatedBy.FirstName + " " + usercreatedBy.LastName;
             switch (activity.EntityType)
             {
                 case EnumHelper.ActivityEntityType.User:
-                    User user = _genericRepository.Get<User>(x => x.Id == activity.EntityTypeId);
+                    ApplicationUser user = _genericRepository.Get<ApplicationUser>(x => x.Id == activity.EntityTypeId);
                     activity.EntityTypeName = user.FirstName + " " + user.LastName;
                     break;
                 case EnumHelper.ActivityEntityType.Business:
@@ -165,7 +165,7 @@ public class ActivityLogService : IActivityLogService
                         activity.TransactionAMount = _genericRepository.Get<LedgerTransactions>(x => x.Id == activity.SubEntityTypeId).Amount;
                         break;
                     case EnumHelper.ActivityEntityType.Role:
-                        User userAdded = _genericRepository.Get<User>(x => x.Id == activity.SubEntityTypeId);
+                        ApplicationUser userAdded = _genericRepository.Get<ApplicationUser>(x => x.Id == activity.SubEntityTypeId);
                         activity.SubEntityTypeName = userAdded.FirstName + " " + userAdded.LastName;
                         if (activity.Message.Contains("inactivated"))
                         {

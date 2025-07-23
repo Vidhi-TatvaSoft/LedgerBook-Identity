@@ -59,7 +59,7 @@ public class UserBusinessMappingService : IUserBusinessMappingService
 
         return userMappingDetails.Select(selectedData =>
         {
-            User user = selectedData.First().User;
+            ApplicationUser user = selectedData.First().User;
             PersonalDetails? personalDetails = selectedData.FirstOrDefault()?.PersonalDetails;
             List<RoleViewModel> userRoleList = selectedData.Where(a => a.Role != null).Select(userMapping => new RoleViewModel
             {

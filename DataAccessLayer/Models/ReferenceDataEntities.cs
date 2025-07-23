@@ -20,11 +20,11 @@ public class ReferenceDataEntities
     public DateTime? DeletedAt { get; set; }
 
     [ForeignKey("CreatedById")]
-    public virtual User CreatedUser { get; set; }
+    public virtual ApplicationUser CreatedUser { get; set; }
 
     [ForeignKey("UpdatedById")]
-    public virtual User UpdatedUser { get; set; } = null!;
+    public virtual ApplicationUser UpdatedUser { get; set; } = null!;
 
     [ForeignKey("DeletedById")]
-    public virtual User DeletedUser { get; set; } = null!;
+    public virtual ApplicationUser DeletedUser { get; set; } = null!;
 }

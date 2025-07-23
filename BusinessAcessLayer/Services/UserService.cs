@@ -65,16 +65,7 @@ public class UserService : IUserService
 
         if (result.Succeeded)
         {
-            User userTemp = new();
-            userTemp.FirstName = user.FirstName;
-            userTemp.LastName = user.LastName;
-            userTemp.Email = user.Email;
-            userTemp.MobileNumber = long.Parse(user.PhoneNumber);
-            userTemp.CreatedAt = DateTime.UtcNow;
-            userTemp.Password = user.PasswordHash;
-            userTemp.ApplicationUserId = user.Id;
-            await _genericRepository.AddAsync<User>(userTemp);
-            return userTemp.Id;
+            return user.Id;
         }
         return 0;
     }
@@ -94,7 +85,7 @@ public class UserService : IUserService
             FirstName = x.User.FirstName,
             LastName = x.User.LastName,
             Email = x.User.Email,
-            MobileNumber = x.User.MobileNumber == null ? 0 : (long)x.User.MobileNumber,
+            MobileNumber = x.User.PhoneNumber == null ? 0 : long.Parse(x.User.PhoneNumber),
             RoleId = x.RoleId,
             RoleName = x.Role.RoleName
         }).ToList().FirstOrDefault()!;
@@ -140,7 +131,6 @@ public class UserService : IUserService
     public async Task<bool> UpdatePassword(ResetPasswordViewModel resetPasswordViewModel)
     {
         ApplicationUser user = _genericRepository.Get<ApplicationUser>(x => x.Email.Trim().ToLower() == resetPasswordViewModel.Email.Trim().ToLower());
-        User userTemp = _genericRepository.Get<User>(x => x.Email.Trim().ToLower() == resetPasswordViewModel.Email.Trim().ToLower());
 
         if (user != null)
         {
@@ -150,10 +140,6 @@ public class UserService : IUserService
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                userTemp.Password = user.PasswordHash;
-                userTemp.UpdatedAt = DateTime.UtcNow;
-                userTemp.UpdatedById = userTemp.Id;
-                await _genericRepository.UpdateAsync<User>(userTemp);
                 return true;
             }
             else
@@ -169,14 +155,14 @@ public class UserService : IUserService
     {
         UserProfileViewModel userProfileViewModel = new();
         userProfileViewModel.AttachmentViewModel = new();
-        User user = _genericRepository.Get<User>(x => x.Id == userId && !x.DeletedAt.HasValue);
+        ApplicationUser user = _genericRepository.Get<ApplicationUser>(x => x.Id == userId && !x.DeletedAt.HasValue);
         if (user != null)
         {
             userProfileViewModel.FirstName = user.FirstName;
             userProfileViewModel.UserId = user.Id;
             userProfileViewModel.LastName = user.LastName;
             userProfileViewModel.Email = user.Email;
-            userProfileViewModel.MobileNumber = user.MobileNumber == null ? 0 : (long)user.MobileNumber;
+            userProfileViewModel.MobileNumber = user.PhoneNumber == null ? 0 : long.Parse(user.PhoneNumber);
             userProfileViewModel.ProfileAttachmentId = user.ProfileAttachmentId;
             if (user.ProfileAttachmentId != null)
             {
@@ -194,8 +180,7 @@ public class UserService : IUserService
 
     public async Task<bool> UpdateUserProfile(UserProfileViewModel userProfileViewModel)
     {
-        User userTemp = _genericRepository.Get<User>(x => x.Id == userProfileViewModel.UserId && !x.DeletedAt.HasValue);
-        ApplicationUser user = _genericRepository.Get<ApplicationUser>(x => x.Id == userTemp.ApplicationUserId && !x.DeletedAt.HasValue);
+        ApplicationUser user = _genericRepository.Get<ApplicationUser>(x => x.Id == userProfileViewModel.UserId && !x.DeletedAt.HasValue);
         if (user != null)
         {
             user.FirstName = userProfileViewModel.FirstName;
@@ -221,15 +206,8 @@ public class UserService : IUserService
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
-                userTemp.FirstName = user.FirstName;
-                userTemp.LastName = user.LastName;
-                userTemp.MobileNumber = long.Parse(user.PhoneNumber);
-                userTemp.ProfileAttachmentId = user.ProfileAttachmentId;
-                userTemp.UpdatedAt = DateTime.UtcNow;
-                userTemp.UpdatedById = userTemp.Id;
-                await _genericRepository.UpdateAsync<User>(userTemp);
                 string message = string.Format(Messages.BusinessActivity, "User", "updated", user.FirstName + " " + user.LastName);
-                await _activityLogService.SetActivityLog(message, EnumHelper.Actiontype.Update, EnumHelper.ActivityEntityType.User, userTemp.Id, userTemp.Id);
+                await _activityLogService.SetActivityLog(message, EnumHelper.Actiontype.Update, EnumHelper.ActivityEntityType.User, user.Id, user.Id);
                 return true;
             }
         }
@@ -238,7 +216,7 @@ public class UserService : IUserService
 
     public string GetuserNameById(int userId)
     {
-        User user = _genericRepository.Get<User>(x => x.Id == userId && !x.DeletedAt.HasValue);
+        ApplicationUser user = _genericRepository.Get<ApplicationUser>(x => x.Id == userId && !x.DeletedAt.HasValue);
         return user.FirstName + " " + user.LastName;
     }
 

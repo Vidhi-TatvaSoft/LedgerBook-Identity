@@ -34,7 +34,7 @@ public class JWTTokenService : IJWTTokenService
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        User user = _genericRepository.Get<User>(u => u.Email == email && !u.DeletedAt.HasValue)!;
+        ApplicationUser user = _genericRepository.Get<ApplicationUser>(u => u.Email == email && !u.DeletedAt.HasValue)!;
         string UserId = user.Id.ToString();
         string FirstName = user.FirstName;
         string LastName = user.LastName;

@@ -188,7 +188,7 @@ public class LoginController : BaseController
                         if (verifictiontoken != null)
                         {
                             _cookieService.SetCookie(Response, TokenKey.UserToken, verifictiontoken);
-                            User user = _loginService.GetUserFromToken(verifictiontoken);
+                            ApplicationUser user = _loginService.GetUserFromTokenIdentity(verifictiontoken);
                             if (user == null)
                             {
                                 return View();

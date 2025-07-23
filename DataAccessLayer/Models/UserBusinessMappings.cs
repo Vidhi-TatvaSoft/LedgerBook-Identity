@@ -26,7 +26,7 @@ public class UserBusinessMappings
     public bool IsActive { get; set; }
 
     [ForeignKey("UserId")]
-    public virtual User User { get; set; }
+    public virtual ApplicationUser User { get; set; }
 
     [ForeignKey("BusinessId")]
     public virtual Businesses Business { get; set; }
@@ -38,11 +38,11 @@ public class UserBusinessMappings
     public virtual PersonalDetails PersonalDetails { get; set; } = null;
     
     [ForeignKey("CreatedById")]
-    public virtual User CreatedUser { get; set; }
+    public virtual ApplicationUser CreatedUser { get; set; }
 
     [ForeignKey("UpdatedById")]
-    public virtual User UpdatedUser { get; set; } = null!;
+    public virtual ApplicationUser UpdatedUser { get; set; } = null!;
 
     [ForeignKey("DeletedById")]
-    public virtual User DeletedUser { get; set; } = null!;
+    public virtual ApplicationUser DeletedUser { get; set; } = null!;
 }

@@ -51,7 +51,7 @@ public class ActivityLogController : BaseController
     public IActionResult GetActivities(string activityData)
     {
         ActivityDataViewModel activityDataVM = JsonConvert.DeserializeObject<ActivityDataViewModel>(activityData);
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         PaginationViewModel<ActivityLogsViewModel> activities = _activityLogService.GetActivities(activityDataVM, user.Id);
         return PartialView("_DisplayActivities", activities);
     }
@@ -60,7 +60,7 @@ public class ActivityLogController : BaseController
     #region get all bsuiness of user
     public IActionResult GetAllBusiness()
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         List<BusinessViewModel> businesses = _businessService.GetAllBusinesses(user.Id);
         return PartialView("_BusinessDropDown", businesses);
     }
@@ -69,7 +69,7 @@ public class ActivityLogController : BaseController
     #region get all parties by business
     public IActionResult GetAllParties(int businessId)
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         List<Parties> parties = _partyService.GetAllPartiesByBusiness(businessId,user.Id);
         return PartialView("_PartiesDropDown", parties);
     }
