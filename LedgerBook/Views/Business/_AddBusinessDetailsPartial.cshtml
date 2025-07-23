@@ -1,0 +1,291 @@
+@using DataAccessLayer.ViewModels;
+@model BusinessMainViewModel;
+
+<div class="modal-content">
+    <div class="modal-header">
+        @if (Model.BusinessDetailViewModel.BusinessItem.BusinessId != 0)
+        {
+            <h5 class="modal-title" id="modal-header">Update Business</h5>
+        }
+        else
+        {
+            <h5 class="modal-title" id="modal-header">Add Business</h5>
+        }
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+            onclick="displayBusinessCards()"></button>
+    </div>
+    <form id="business-details-form-id">
+        <div class="modal-body p-0 ps-3  " style="min-height: 500px;">
+            <div class="row " style="min-height: 500px;">
+                <div class="col-3 col-lg-2  border-0  border-end cursor-pointer p-0 " style="max-width: 190px;">
+                    <a class="d-flex active-div p-2 w-100 mb-2 text-nowrap text-truncate" title="Business Details"
+                        id="business-details-btn" style="text-decoration: none; ">Business Details</a>
+                    @if (Model.BusinessDetailViewModel.BusinessItem.BusinessId != 0)
+                    {
+                        <a class="d-flex inactive-div cursor-pointer text-nowrap p-2 w-100 text-truncate "
+                            title="User Management" id="user-details-btn" style="text-decoration: none;"
+                            onclick="displayUserDetails()">User
+                            Management</a>
+                    }
+                </div>
+                <div id="add-business-body" class="col-9 col-lg-10 pe-4">
+                    <div class="fs-3 fw-bold text-color ">Business Details</div>
+                    <div>
+                        @* <form id="business-details-form-id"> *@
+                        <div class="row">
+
+                            <div class="col-12 mt-3 d-flex justify-content-center align-content-center">
+                                <div class="position-relative rounded-circle overflow-hidden border bg-white"
+                                    style="width: 150px; height: 150px;">
+
+                                    <!-- Hidden File Input -->
+                                    <input type="file" onchange="readURL(this);"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessLogoAttachment.BusinessLogo"
+                                        class="d-none" id="choose-file" accept=".jpeg, .jpg, .png" />
+
+                                    <!-- Label acts as both placeholder and click target -->
+                                    <label for="choose-file" class="w-100 h-100 d-block position-relative"
+                                        onmouseover="removeOpacity()" onmouseout="addOpacity()"
+                                        style="cursor: pointer;">
+
+                                        <!-- Uploaded image -->
+                                        <img src="#" id="uploadedimage"
+                                            class="w-100 h-100 object-fit-cover rounded-circle d-none uploadedimage-class-business"
+                                            alt="Profile" />
+
+                                        <!-- Placeholder icon and text -->
+                                        <div id="placeholder"
+                                            class="w-100 h-100 d-flex flex-column justify-content-center align-items-center text-secondary bg-light rounded-circle"
+                                            style="cursor: pointer;">
+                                            <i class="fa-solid fa-cloud-arrow-up fs-4 mb-1"></i>
+                                            <small>Browse</small>
+                                        </div>
+
+                                        <!-- Hover overlay: visible only when image is shown -->
+                                        <div class="image-overlay position-absolute top-0 start-0 w-100 h-100 rounded-circle d-flex flex-column  justify-content-center align-items-center text-white fw-medium opacity-class"
+                                            style="">
+
+                                            <!-- Upload icon and label -->
+                                            <div class="text-center">
+                                                <i class="fa-solid fa-cloud-arrow-up me-2"></i>Change
+                                            </div>
+
+                                            <!-- Horizontal line -->
+                                            <div class="mt-2"
+                                                style="width: 60%; border-bottom: 1px solid rgba(255, 255, 255, 0.5);">
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                                <div class="form-floating ">
+                                    <div class="d-none" id="hidden-business-id-div">
+                                        @Model.BusinessDetailViewModel.BusinessItem.BusinessId</div>
+                                    <input type="hidden" id="hidden-business-id-input"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessId">
+                                    <input type="text" onblur="TrimInput(this)"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessName"
+                                        class="form-control" id="BusinessName" placeholder="Business Name*">
+                                    <label for="BusinessName" class="fs-6 text-secondary">Business Name*</label>
+                                    <span asp-validation-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessName"
+                                        class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                                <div class="form-floating ">
+                                    <input type="Number" oninput="NumberValidation(this)"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.MobileNumber"
+                                        class="form-control" id="MobileNumber-business" placeholder="Mobile Number*">
+                                    <label for="MobileNumber-business"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.MobileNumber"
+                                        class="fs-6 text-secondary">Mobile
+                                        Number*</label>
+                                    <span asp-validation-for="@Model.BusinessDetailViewModel.BusinessItem.MobileNumber"
+                                        class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                                <div class="form-floating">
+                                    <select class="form-select"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinescategoryId"
+                                        asp-items="@ViewBag.Categories" id="categories"
+                                        aria-label="Floating label select example">
+                                    </select>
+                                    <label for="floatingSelect text-secondary">Business Category</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                                <div class="form-floating">
+                                    <select class="form-select"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessTypeId"
+                                        asp-items="@ViewBag.Types" id="Types"
+                                        aria-label="Floating label select example">
+                                    </select>
+                                    <label for="floatingSelect text-secondary">Business Type</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                                <div class="form-floating ">
+                                    <input type="text" onblur="TrimInput(this)"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessAddress.AddressLine1"
+                                        class="form-control" id="AddressLine1" placeholder="Building/House Number">
+                                    <label for="AddressLine1"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessAddress.AddressLine1"
+                                        class="fs-6 text-secondary">Building/House
+                                        Number</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                                <div class="form-floating ">
+                                    <input type="text" onblur="TrimInput(this)"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessAddress.AddressLine2"
+                                        class="form-control" id="AddressLine2" placeholder="Area">
+                                    <label for="AddressLine2"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessAddress.AddressLine2"
+                                        class="fs-6 text-secondary">Area</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                                <div class="form-floating ">
+                                    <input type="text" onblur="TrimInput(this)"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessAddress.City"
+                                        class="form-control" id="City" placeholder="City">
+                                    <label for="City"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessAddress.City"
+                                        class="fs-6 text-secondary">City</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                                <div class="form-floating ">
+                                    <input type="Number" oninput="PincodeValidation(this)"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessAddress.Pincode"
+                                        class="form-control" id="Pincode" placeholder="Pincode">
+                                    <label for="Pincode"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.BusinessAddress.Pincode"
+                                        class="fs-6 text-secondary">Pincode</label>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-xl-3 mt-3">
+                                <div class="form-check form-switch">
+                                    <label class="form-check-label" for="IsActive">Business Active</label>
+                                    <input class="form-check-input" type="checkbox" id="IsActive"
+                                        asp-for="@Model.BusinessDetailViewModel.BusinessItem.IsActive">
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-center">
+            <button type="submit" class="btn btn-primary" id="temp-id" onclick="SaveBusiness()">Save</button>
+            <button type="submit" class="btn btn-primary" id="saveclose-id" onclick="SaveAndCloseBusiness()">Save &
+                Close</button>
+            <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal"
+                onclick="displayBusinessCards()">Close</button>
+        </div>
+    </form>
+</div>
+
+
+<!----------------------------------- #modal------------------------------------------->
+<div id="user-details-confirmation-modal" class="modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-header">Add User Confirmation</h5>
+                <button type="button" class="btn-close userdetail-confirmation-modal-close" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body ">
+                <div class="delete-cat-image d-flex flex-column  align-items-center">
+                    <p>Business created successfully.</p>
+                    <p>Do you want to add users in this business?</p>
+
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary" onclick="renderUserDetails()">Yes</button>
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<partial name="_ValidationScriptsPartial" />
+<script type="module" src="~/js/constant.js"></script>
+<script>
+
+    function readURL(input) {
+        const file = input.files[0];
+        if (!file) {
+            return;
+        }
+        const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (validImageTypes.includes(file.type)) {
+            $("#browseFileText").text(file.name);
+            if (input.files && input.files[0]) {
+
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#uploadedimage').attr('src', e.target.result).width(50).height(50);
+                    document.getElementById("uploadedimage").classList.remove("d-none")
+                    @* document.getElementById("cloud-icon").classList.add("d-none") *@
+            };
+                reader.readAsDataURL(input.files[0]);
+            }
+            return;
+        } else {
+            Toaster("Please Upload an Image in JPEG, PNG or JPG format", "error");
+            input.value = null;
+        }
+
+    }
+
+    $(document).ready(function () {
+        var businessDetails = @Html.Raw(Json.Serialize(Model));
+        fillBusinessDetailsVM(businessDetails);
+
+        setTimeout(function () {
+            if (businessDetailsVM.businessDetailViewModel.businessItem != null &&
+                businessDetailsVM.businessDetailViewModel.businessItem.fileName != null) {
+                $("#browseFileText").text(businessDetailsVM.businessDetailViewModel.businessItem.fileName);
+            }
+        }, 50)
+
+        if (businessDetailsVM.businessDetailViewModel.businessItem != null
+            && businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment != null
+            && businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment.businesLogoPath != null) {
+            document.getElementById("uploadedimage").classList.remove("d-none");
+            $('#uploadedimage').attr('src', businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment.businesLogoPath).width(50).height(50);
+
+        }
+
+        if (parseInt($("#hidden-business-id-div").html()) != 0) {
+            $("#hidden-business-id-input").val(parseInt($("#hidden-business-id-div").html()))
+        }
+
+    })
+
+    function removeOpacity() {
+        let classname = document.getElementsByClassName("uploadedimage-class-business")[0].getAttribute('src')
+        if (classname != "#") {
+            document.getElementsByClassName("image-overlay")[0].classList.remove("opacity-class")
+        }
+    }
+    function addOpacity() {
+        let classname = document.getElementsByClassName("uploadedimage-class-business")[0].getAttribute('src')
+        if (classname != "#") {
+            document.getElementsByClassName("image-overlay")[0].classList.add("opacity-class")
+        }
+    }
+
+</script>

@@ -1,0 +1,51 @@
+@using DataAccessLayer.ViewModels;
+@model LoginViewModel;
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<h2><b>Login</b></h2>
+<form id="login-form-id" class="login-form">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-floating mb-4 position-relative">
+        <input asp-for="Email" type="email" id="email" class="form-control border border-dark w-100 h-100"
+            placeholder="Email*" required />
+        <i class="fa-solid fa-envelope position-absolute translate-middle-y fs-4 me-3 email-icon-class" ></i>
+        <label for="email" class="form-floating text-dark ">Email*</label>
+        <span asp-validation-for="Email" class="d-flex justify-content-start text-danger "></span>
+    </div>
+
+    <div class="form-floating mb-4 position-relative">
+        <input asp-for="Password" type="password" class="form-control border border-dark w-100 " id="password"
+            placeholder="Password*" required />
+        <i class="fa-solid fa-eye-slash position-absolute translate-middle-y fs-4 me-3 password-icon-class"
+            onclick="toggle_fnction('togglePassword','password')" id="togglePassword"></i>
+        <label for="password" class="form-floating text-dark ">Password*</label>
+        <span asp-validation-for="Password" class="d-flex justify-content-start  text-danger ms-1"></span>
+    </div>
+
+    <!-- Remember me and forgot pass section -->
+    <div
+        class="rememberme-div d-flex flex-md-row flex-column flex-wrap justify-content-md-between justify-content-start align-items-start ">
+        <div class="form-check">
+            <input class="form-check-input  border-dark" asp-for="RememberMe" type="checkbox" id="rememberme">
+            <label class="fs-5 ms-2 text-dark text-nowrap" for="rememberme">Remember Me</label>
+        </div>
+        <a id="forgot-password" class="text-color fs-5 cursor-pointer text-decoration-none text-nowrap">Forgot
+            Password?</a>
+    </div>
+    <div class="d-flex justify-content-start text-danger  fs-5 mb-2">@ViewData["LoginMessage"]</div>
+
+    <div class="d-grid">
+        <input value="Login" class="login-btn btn btn-primary fs-5  pt-2 pb-2 w-100 " type="submit" />
+    </div>
+    <div class="d-flex justify-content-center mt-2 fs-5 text-dark text-nowrap flex-wrap">Don't have an Account?
+        &nbsp;<a class="text-color cursor-pointer" onclick="flipToSignup()" style="text-decoration: none;">Sign Up</a>
+    </div>
+</form>
+
+
+<partial name="_ValidationScriptsPartial" />
+<partial name="_Toaster" />

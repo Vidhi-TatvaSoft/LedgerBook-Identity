@@ -1,0 +1,230 @@
+@using BusinessAcessLayer.Constant
+@using DataAccessLayer.ViewModels;
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+
+@model UserProfileViewModel;
+@{
+    ViewData["Title"] = "User Profile";
+    Layout = "~/Views/Shared/_BusinessCardLayout.cshtml";
+}
+
+<div class=" d-flex justify-content-center align-items-center h-100">
+    <div class=" rounded border bg-white shadow  profile-card">
+        <!--Add new user  -->
+        <div class="add-user-main-div d-flex justify-content-center mt-2">
+            <!-- user txt -->
+            <div class="user-div d-flex">
+                <div class=" fs-2 fw-bold text-color">My Profile</div>
+            </div>
+        </div>
+
+        <!-- form -->
+        <div class="form-main-div mx-auto " style="width: 98%;">
+            <div class="row d-flex ">
+
+                <form asp-action="Profile" asp-controller="User" method="post" class="p-2"
+                    enctype="multipart/form-data">
+                    <!-- profile pic -->
+                    <div class="row">
+                        <!-- <div class=""> -->
+                        <div class="col-12 mt-3 d-flex justify-content-center align-content-center">
+
+                            <div class="position-relative rounded-circle overflow-hidden border bg-white"
+                                style="width: 130px; height: 130px;">
+
+                                <!-- Hidden File Input -->
+                                <input type="file" onchange="readURL(this);"
+                                    asp-for="@Model.AttachmentViewModel.BusinessLogo" class="d-none" id="choose-file"
+                                    accept=".jpeg, .jpg, .png" />
+
+                                <!-- Label acts as both placeholder and click target -->
+                                <label for="choose-file" class="w-100 h-100 d-block position-relative"
+                                    onmouseover="removeOpacity()" onmouseout="addOpacity()" style="cursor: pointer;">
+
+                                    <!-- Uploaded image -->
+                                    @if (Model.AttachmentViewModel != null)
+                                    {
+                                        @if (Model.AttachmentViewModel.BusinesLogoPath != null)
+                                        {
+                                            <img src="@(Model.AttachmentViewModel != null ? Model.AttachmentViewModel.BusinesLogoPath != null ? Model.AttachmentViewModel.BusinesLogoPath : "#" : "#")"
+                                                id="uploadedimage"
+                                                class="w-100 h-100 object-fit-cover rounded-circle img-fluid uploadedimage-class-profile"
+                                                alt="Profile" />
+                                        }
+                                        else
+                                        {
+                                            <img src="@(Model.AttachmentViewModel != null ? Model.AttachmentViewModel.BusinesLogoPath != null ? Model.AttachmentViewModel.BusinesLogoPath : "#" : "#")"
+                                                id="uploadedimage"
+                                                class="w-100 h-100 object-fit-cover rounded-circle d-none img-fluid uploadedimage-class-profile"
+                                                alt="Profile" />
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <img src="@(Model.AttachmentViewModel != null ? Model.AttachmentViewModel.BusinesLogoPath != null ? Model.AttachmentViewModel.BusinesLogoPath : "#" : "#")"
+                                            id="uploadedimage"
+                                            class="w-100 h-100 object-fit-cover rounded-circle d-none img-fluid uploadedimage-class-profile"
+                                            alt="Profile" />
+                                    }
+
+
+                                    <!-- Placeholder icon and text -->
+                                    <div id="placeholder"
+                                        class="w-100 h-100 d-flex flex-column justify-content-center align-items-center text-secondary bg-light rounded-circle"
+                                        style="cursor: pointer;">
+                                        <i class="fa-solid fa-cloud-arrow-up fs-4 mb-1"></i>
+                                        <small>Browse</small>
+                                    </div>
+
+                                    <!-- Hover overlay: visible only when image is shown -->
+                                    <div
+                                        class="image-overlay position-absolute top-0 start-0 w-100 h-100 rounded-circle d-flex flex-column justify-content-center align-items-center text-white fw-medium opacity-class">
+
+                                        <!-- Upload icon and label -->
+                                        <div class="text-center">
+                                            <i class="fa-solid fa-cloud-arrow-up me-2"></i>Change
+                                        </div>
+
+                                        <!-- Horizontal line -->
+                                        <div class="mt-2"
+                                            style="width: 60%; border-bottom: 1px solid rgba(255, 255, 255, 0.5);">
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+
+                        <!-- </div> -->
+                    </div>
+                    <div class="row p-3">
+                        <!-- two cols -->
+                        <div class=" col-12 mt-3">
+                            <div class="form-floating ">
+                                <input type="hidden" asp-for="UserId" id="userId-profile">
+                                <input type="text" class="form-control" id="firstname-profile" asp-for="FirstName"
+                                    placeholder="First Name8">
+                                <label asp-for="FirstName" for="firstname-profile" class="fs-6 text-secondary">First
+                                    Name*</label>
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <div class="form-floating ">
+                                <input asp-for="LastName" type="text" class="form-control" id="lastname-profile"
+                                    placeholder="Last Name*">
+                                <label asp-for="LastName" for="lastname-profile" class="fs-6 text-secondary">Last
+                                    Name*</label>
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <div class="form-floating ">
+                                <input asp-for="Email" type="text" class="form-control" id="email-profile"
+                                    placeholder="Email" disabled>
+                                <input type="hidden" asp-for="Email">
+                                <label asp-for="Email" for="email-profile" class="fs-6 text-secondary">Email</label>
+                                <span asp-validation-for="Email" class="text-danger"></span>
+
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <div class="form-floating">
+                                <input asp-for="MobileNumber" type="Number" class="form-control"
+                                    oninput="NumberValidation(this)" id="mobilenumber-profile"
+                                    placeholder="Mobile Number">
+                                <label asp-for="MobileNumber" for="mobilenumber-profile"
+                                    class="fs-6 text-secondary">Mobile
+                                    number</label>
+                                <span asp-validation-for="MobileNumber" class="text-danger"></span>
+
+                            </div>
+                        </div>
+
+                        <div class="d-flex mb-4 d-flex justify-content-end">
+                            <div class="craete-button mt-3">
+                                <button class="btn btn-primary text-light  border text" type="submit">
+                                    Update</button>
+                            </div>
+
+                            <div class="craete-button mt-3 text-primary ms-3">
+                                @if (HttpContextAccessor.HttpContext.Request.Cookies[TokenKey.BusinessToken] != null)
+                                {
+                                    <a asp-action="ManageBusiness" asp-controller="Party"
+                                        class="btn  btn-outline-primary border border-primary  border ">
+                                        Cancel</a>
+                                }
+                                else
+                                {
+                                    <a asp-action="Index" asp-controller="Business"
+                                        class="btn  btn-outline-primary border border-primary  border ">
+                                        Cancel</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#uploadedimage').attr('src', e.target.result).width(50).height(50);
+                    document.getElementById("uploadedimage").classList.remove("d-none")
+                    document.getElementById("cloud-icon").classList.add("d-none")
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+
+        $("#choose-file").change(function () {
+
+            const file = this.files[0];
+            if (!file) {
+                return;
+            }
+            const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            if (validImageTypes.includes(file.type)) {
+                $("#browseFileText").text(file.name);
+                return;
+            } else {
+                Toaster("Please Upload an Image in JPEG, PNG or JPG format", "error");
+                this.value = null;
+            }
+        });
+
+        $(document).ready(function () {
+            if (document.getElementById("mobilenumber-profile").value == 0) {
+                $("#mobilenumber-profile").val("")
+            }
+        })
+
+        function removeOpacity() {
+            let classname = document.getElementsByClassName("uploadedimage-class-profile")[0].getAttribute('src')
+            if(classname != "#"){
+            document.getElementsByClassName("image-overlay")[0].classList.remove("opacity-class")
+            }
+        }
+        function addOpacity() {
+            let classname = document.getElementsByClassName("uploadedimage-class-profile")[0].getAttribute('src')
+            if(classname != "#"){
+            document.getElementsByClassName("image-overlay")[0].classList.add("opacity-class")
+            }
+        }
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_Toaster" />
+}

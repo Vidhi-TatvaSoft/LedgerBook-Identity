@@ -1,0 +1,142 @@
+@using Microsoft.AspNetCore.Authorization
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject Microsoft.AspNetCore.Authorization.IAuthorizationService AuthorizationService;
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
+@using DataAccessLayer.ViewModels;
+@model PartyTransactionViewModel;
+
+<div class="modal-content bg-light shadow-lg border-2">
+    <div class="modal-header">
+        @if (Model.PartyViewModel.PartyId == 0)
+        {
+            <h5 class="modal-title" id="add-user-modal-title">Add Party</h5>
+        }
+        else
+        {
+            <h5 class="modal-title" id="add-user-modal-title">Update Party</h5>
+        }
+        <button type="button" class="btn-close usermodal-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form id="party-manage-form">
+        <div class="modal-body row">
+            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                <div class="form-floating ">
+                    <input type="hidden" asp-for="@Model.PartyViewModel.PartyId" id="party-id-hidden">
+                    <input type="hidden" asp-for="@Model.PartyViewModel.BusinessId" id="">
+                    @if (Model.PartyViewModel.PartyId != 0)
+                    {
+                        <div class="d-none" id="party-type-string-div">@Model.PartyTypeString</div>
+                        <input type="hidden" asp-for="@Model.PartyViewModel.PartyTypeString" id="party-type-string">
+                    }
+                    <input type="text" oninput="RemoveWhiteSpace(this)" onblur="TrimInput(this)"
+                        asp-for="@Model.PartyViewModel.PartyName" class="form-control" id="party-name"
+                        placeholder="Party Name">
+                    <input type="hidden" asp-for="@Model.PartyViewModel.PartyName">
+                    <label for="party-name" asp-for="@Model.PartyViewModel.PartyName" class="fs-6 text-secondary">Party
+                        Name*</label>
+                    <span asp-validation-for="@Model.PartyViewModel.PartyName" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                <div class="form-floating ">
+                    <input type="text" oninput="RemoveWhiteSpace(this)" onblur="TrimInput(this)"
+                        asp-for="@Model.PartyViewModel.Email" class="form-control" id="party-email" placeholder="Email">
+                    <input type="hidden" asp-for="@Model.PartyViewModel.Email">
+                    <label for="party-email" asp-for="@Model.PartyViewModel.Email"
+                        class="fs-6 text-secondary">Email*</label>
+                    <span asp-validation-for="@Model.PartyViewModel.Email" class="text-danger"></span>
+                </div>
+            </div>
+            @if (Model.PartyViewModel.PartyId == 0)
+            {
+                <div class=" col-8 mt-3 pe-0 ">
+                    <div class="form-floating ">
+
+                        <input type="Number" oninput="RemoveWhiteSpace(this);MinAmount(this)" onblur="TrimInput(this);"
+                            asp-for="@Model.PartyViewModel.Amount" class="form-control" id="party-amount"
+                            placeholder="Opening Amount">
+                        <label for="party-amount" asp-for="@Model.PartyViewModel.Amount" class="fs-6 text-secondary">Opening
+                            Amount</label>
+                        <span asp-validation-for="@Model.PartyViewModel.Amount"
+                            class="text-danger amount-validation"></span>
+                    </div>
+                </div>
+                <div class=" col-4 mt-3 ps-0 ">
+                    <div class="form-floating">
+                        <select id="party-transactionType" class=" form-control"
+                            asp-for="@Model.PartyViewModel.TransactionType">
+                            <option value="@DataAccessLayer.Constant.EnumHelper.TransactionType.GOT">You Got
+                            </option>
+                            <option value="@DataAccessLayer.Constant.EnumHelper.TransactionType.GAVE">You Gave
+                            </option>
+                        </select>
+                        <label for="party-transactionType">Type</label>
+                    </div>
+                </div>
+            }
+            <div class="mt-3">
+                <div class="fs-5"> Who are they?</div>
+                <div class="d-flex justify-content-start p-2">
+                    @if ((await AuthorizationService.AuthorizeAsync(User, "SalesManager")).Succeeded)
+                    {
+                        <div class="form-check  me-3">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="customer-radio"
+                                checked >
+                            <label class="form-check-label" for="customer-radio">
+                                Customer
+                            </label>
+                        </div>
+                    }
+                    @if ((await AuthorizationService.AuthorizeAsync(User, "PurchaseManager")).Succeeded)
+                    {
+                        @if ((await AuthorizationService.AuthorizeAsync(User, "SalesManager")).Succeeded)
+                        {
+                            <div class="form-check ">
+                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="supplier-radio">
+                                <label class="form-check-label" for="supplier-radio">
+                                    Supplier
+                                </label>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-check ">
+                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="supplier-radio"
+                                    checked>
+                                <label class="form-check-label" for="supplier-radio">
+                                    Supplier
+                                </label>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" onclick="saveParty()">Save </button>
+            <button type="submit" class="btn btn-primary" onclick="saveAndCloseParty()">Save & Close</button>
+            <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Close</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function MinAmount(input) {
+        let value = parseFloat(input.value);
+        if (value <= 0.0) {
+            $(".amount-validation").text("Amount should be greater than 0")
+        }
+        if (value > 10000) {
+            $(".amount-validation").text("Amount should be greater than 0")
+        }
+    }
+
+
+</script>
+
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+<partial name="_Toaster" />

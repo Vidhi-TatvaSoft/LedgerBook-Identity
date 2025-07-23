@@ -1,0 +1,273 @@
+@using DataAccessLayer.Constant
+@using DataAccessLayer.ViewModels;
+@model ReportTransactionEntriesViewModel;
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Details</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            width: 100%;
+            min-width: 320px;
+            margin: 0 auto;
+        }
+
+        .logo-container {
+            margin-bottom: 20px;
+            background-color: #126773;
+            height: 80px;
+        }
+
+        .logo {
+            width: 40px;
+            display: inline-block;
+            vertical-align: middle;
+            border-radius: 50%;
+            color: white;
+            right: 0px;
+        }
+
+        .logo-image {
+            position: absolute;
+            right: 2%;
+        }
+
+        .logo-text {
+            color: white;
+            font-size: 25px;
+            font-weight: 600;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .business-name {
+            text-align: left;
+            margin-left: 2%;
+            padding-top: 30px;
+            color: white;
+            font-size: large;
+            font-weight: bold;
+        }
+
+        .d-flex {
+            display: -webkit-box !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+
+        .statement-name {
+            text-align: center;
+            font-size: 25px;
+        }
+
+        .date-range {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        .credit-debit-balance-div {
+            margin-top: 20px;
+            margin-left: 4%;
+            margin-right: 4%;
+            border: 2px solid gray;
+            border-radius: 5px;
+            padding: 30px;
+        }
+
+        .table-styling {
+            width: 100%;
+        }
+
+        .debit-td {
+            text-align: start;
+            font-size: 20px;
+        }
+
+        .credit-td {
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .balance-td {
+            text-align: end;
+            font-size: 20px;
+        }
+
+        .border-table {
+            border-left: 2px solid gray;
+            border-right: 2px solid gray;
+        }
+
+        .margin-right-net {
+            margin-right: 12%;
+        }
+
+        .margin-left-debit {
+            margin-left: 12%;
+        }
+
+        .margin-top {
+            margin-top: 2%;
+        }
+
+        .entries-count {
+            padding: 30px;
+            margin-left: 1.5%;
+            padding-bottom: 0px;
+
+        }
+
+        .entries-table-div{
+            padding: 30px;
+            margin-left: 1.5%;
+            margin-right: 1.5%;
+        }
+
+        .table-entries{
+            width: 100%;
+            border-collapse: collapse;
+            color: gray;
+        }
+
+        .borders{
+            border: 2px solid gray;
+            padding: 10px;
+        }
+
+        th{
+            color: gray;
+            background-color: rgb(252, 246, 240);
+        }
+        .bg-gray{
+            background-color: rgb(252, 246, 240);
+        }
+        .bg-light{
+            background-color: rgb(252, 240, 240);
+            text-align: end;
+        }
+        .bg-success{
+            background-color: rgb(218, 245, 238);
+            text-align: end;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Start heading logo -->
+        <div class="logo-container d-flex">
+            <div class="business-name">@Model.Businessname</div>
+            <div class="logo-image">
+                <img src="/images/logo.jpg" alt="ledgerbook" class="logo" />
+                <p class="logo-text">Ledgerbook</p>
+            </div>
+
+        </div>
+
+        <div class="text-center">
+            <div class="statement-name">@Model.PartyName Statement</div>
+            <div class="text-cneter date-range">(@Model.Startdate - @Model.EndDate)</div>
+        </div>
+
+        <div class="credit-debit-balance-div">
+            <table class="table-styling">
+                <tbody>
+                    <tr>
+                        <td class="debit-td">
+                            <div>
+                                <div>Total Debit (-)</div>
+                                <div class="margin-left-debit margin-top">@Model.youGave</div>
+                            </div>
+                        </td>
+                        <td class="credit-td border-table">
+                            <div>
+                                <div>Total Credit (+)</div>
+                                <div class="margin-top">@Model.YouGot</div>
+                            </div>
+                        </td>
+                        <td class="balance-td">
+                            <div>
+                                <div>Net Balance</div>
+                                <div class="margin-right-net margin-top">@Model.NetBalance</div>
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="entries-count">
+            No. of entries : @Model.TransactionsList.Count (@Model.TimePeriod)
+        </div>
+
+        <div class="entries-table-div">
+            <table class="table-entries borders">
+                <thead class="">
+                    <tr class="">
+                        <th class="text-center borders">Date</th>
+                        <th class="text-center borders">Name</th>
+                        <th class="text-center borders">Details</th>
+                        <th class="text-center borders">Debit(-)</th>
+                        <th class="text-center borders">Credit(+)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(Model.TransactionsList.Count != 0){
+                    @foreach(var transaction in  Model.TransactionsList){
+                        <tr>
+                            <td class="text-center borders">@transaction.CreateDate</td>
+                            <td class="text-center borders">@transaction.PartyName</td>
+                            <td class="text-center borders">@transaction.Description</td>
+                            @if(transaction.TransactionType == (byte)EnumHelper.TransactionType.GAVE){
+                                <td class="text-center borders bg-light">@transaction.TransactionAmount</td>
+                                <td class="text-center borders bg-success">-</td>
+                            }else{
+                                 <td class="text-center borders bg-light">-</td>
+                                <td class="text-center borders bg-success">@transaction.TransactionAmount</td>
+                            }
+                            
+                        </tr>
+                    }
+                    }else{
+                        <tr>
+                        <td colspan="5" class="text-center " style="font-size: 20px; padding: 10px;">
+                            No entries found
+                        </td>
+                    </tr>
+                    }
+                   
+                </tbody>
+            </table>
+
+            <table class="table-entries borders margin-top">
+                <tbody>
+                    <tr>
+                        <td class="borders bg-gray text-center" >Grand Total</td>
+                        <td class="borders bg-light ">@Model.youGave</td>
+                        <td class="borders bg-success">@Model.YouGot</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</body>
+
+</html>

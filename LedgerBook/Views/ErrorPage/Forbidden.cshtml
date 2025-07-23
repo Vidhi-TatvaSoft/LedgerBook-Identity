@@ -1,0 +1,25 @@
+@{
+    Layout = "~/Views/Shared/_PageLayout.cshtml";
+    ViewData["Title"] ="Forbidden";
+}
+
+<div class="container-fluid vw-100 vh-100 d-flex align-items-center" style="background-color: rgb(210, 247, 247);">
+        <div class="row d-flex align-items-center col-12">
+            <div class="col-12 d-flex justify-content-center">
+                <img src="~/images/logo.jpg" width="70px" alt="">
+                    <span class="ms-2 fs-1 fw-bold text-color">Ledgerbook</span>
+            </div>
+            <div class="col-12 text-color d-flex justify-content-center" style="font-size: 200px;">
+                403
+            </div>
+            <div class="col-12 d-flex justify-content-center" style="font-size: 30px;">
+                Forbidden
+            </div>
+            <div class="col-12 d-flex justify-content-center text-color mt-4">
+                Oops, you do Not have Permission to Acccess this.
+            </div>
+            <div class="col-12 d-flex justify-content-center text-color mt-4">
+                 <a class="btn btn-primary " asp-action="Logout" asp-controller="Login">Login</a>
+            </div>
+        </div>
+    </div>

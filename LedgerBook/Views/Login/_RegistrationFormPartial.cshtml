@@ -1,0 +1,73 @@
+@using DataAccessLayer.ViewModels;
+@model RegistrationViewModel;
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h2><b>Register</b></h2>
+<form  id="registrationForm">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-floating mb-4 position-relative">
+        <input asp-for="FirstName" type="text" id="FirstName" class="form-control border border-dark w-100 h-100"
+            placeholder="First Name*" required />
+        <i class="fa-solid fa-user position-absolute translate-middle-y fs-4 me-3 user-icon-class rounded" ></i>
+        <label for="FirstName" class="form-floating text-dark ">First Name*</label>
+        <span asp-validation-for="FirstName" class="d-flex justify-content-start text-danger "
+            id="FistNameValidationMessage"></span>
+    </div>
+
+    <div class="form-floating mb-4 position-relative">
+        <input asp-for="LastName" type="text" id="LastName" class="form-control border border-dark w-100 h-100"
+            placeholder="Last Name*" required />
+        <i class="fa-solid fa-user position-absolute translate-middle-y fs-4 me-3 user-icon-class" ></i>
+        <label for="LastName" class="form-floating text-dark ">Last Name*</label>
+        <span asp-validation-for="LastName" class="d-flex justify-content-start text-danger "
+            id="LastNameValidationMessage"></span>
+    </div>
+
+    <div class="form-floating mb-4 position-relative">
+        <input asp-for="Email" type="email" id="email-signup" class="form-control border border-dark w-100 h-100"
+            placeholder="Email*" required />
+        <i class="fa-solid fa-envelope position-absolute translate-middle-y fs-4 me-3 email-icon-class"></i>
+        <label for="email-signup" class="form-floating text-dark ">Email*</label>
+        <span asp-validation-for="Email" class="d-flex justify-content-start text-danger "
+            id="emailValidationMessage"></span>
+    </div>
+
+    <div class="form-floating mb-4 position-relative">
+        <input asp-for="Password" type="password" id="password" class="form-control border border-dark w-100 h-100"
+            placeholder="Password*" required />
+        <i class="fa-solid fa-eye-slash position-absolute translate-middle-y fs-4 me-3 "
+            onclick="toggle_fnction('togglePassword','password')" id="togglePassword" style="  top: 25px;right: -12px;background: white; padding: 11px; padding-top: 14px;"
+        ></i>
+        <label for="password" class="form-floating text-dark  text-left">Password*</label>
+        <span asp-validation-for="Password" class="d-flex justify-content-start text-danger "
+            id="passwordValidationMessage"></span>
+    </div>
+
+    <div class="form-floating mb-4 position-relative">
+        <input asp-for="ConfirmPassword" type="password" id="confirmPassword"
+            class="form-control border border-dark w-100 h-100" placeholder="Confirm Password*" required />
+        <i class="fa-solid fa-eye-slash position-absolute translate-middle-y fs-4 me-3 password-icon-class"
+            onclick="toggle_fnction('togglePassword1','confirmPassword')" id="togglePassword1"
+            ></i>
+        <label for="confirmPassword" class="form-floating text-dark  text-left">Confirm Password*</label>
+        <span asp-validation-for="ConfirmPassword" class="d-flex justify-content-start text-danger "
+            id="confirmPasswordValidationMessage"></span>
+    </div>
+
+    <div class="d-flex justify-content-start text-danger  fs-5 mb-2">@ViewData["RegisterMessage"]</div>
+
+    <div class="d-grid">
+        <input value="Sign Up" class="login-btn btn btn-primary fs-5  pt-2 pb-2 w-100" type="submit" />
+    </div>
+    <div class="d-flex justify-content-center mt-2 fs-5 text-dark text-nowrap flex-wrap">Already have an Account
+        ? <a class="text-color cursor-pointer ms-3" onclick="flipToLogin()" style="text-decoration: none;">Login</a>
+    </div>
+</form>
+
+
+<partial name="_ValidationScriptsPartial" />
+<partial name="_Toaster" />

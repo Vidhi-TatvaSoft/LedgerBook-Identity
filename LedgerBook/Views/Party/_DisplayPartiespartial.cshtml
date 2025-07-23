@@ -1,0 +1,125 @@
+@using DataAccessLayer.ViewModels;
+@model List<PartyViewModel>
+
+@if (Model.Count == 0)
+{
+    <div class="d-flex flex-column justify-content-center align-items-center " style="height: calc(100vh - 365px);">
+        <div><img src="~/images/users.png" alt="" height="150px"></div>
+        <div class="fs-4 text-secondary">No Party Selected</div>
+    </div>
+}
+else
+{
+    @foreach (var party in Model)
+    {
+        <div class="d-flex justify-content-between border cursor-pointer p-2 party-list-div" id="party-id-@party.PartyId" title="Select party"
+            onclick="displaySelectedParyDetails(@party.PartyId)" >
+            <div class="d-flex gap-3">
+                <div class="iamge">
+                    <div class="d-flex justify-content-center align-items-center fs-1 rounded-circle " style="height: 50px !important; width: 50px !important; background-color: #e0f1f3;"><span class="pb-1 fs-4 fw-bold" style="color: #2F8891;">@party.PartyName.ToString().ToUpper()[0]</span></div>
+                    @* <img src="~/images/user.png" class=" " style="height: 5vh; border-radius: 50%; "> *@
+                </div>
+                <div class="name-time">
+                    <div class="name fs-5 fw-semibold">@party.PartyName</div>
+                    <div class="party-created-time-hidden d-none">@if(party.UpdatedAt != null){
+                        @party.UpdatedAt
+                    }else if (party.CreatedAt != null)
+                    {
+                        @party.CreatedAt
+                    }
+                </div>
+                <div class="text-secondary party-created-time">1 day ago</div>
+            </div>
+        </div>
+
+        <div class="amount-type">
+
+
+            @if (party.Amount == 0)
+            {
+                <div class="fs-5 fw-bold text-end ">₹
+                    @Math.Abs((decimal)party.Amount)</div>
+                <div></div>
+            }
+            else
+            {
+                <div
+                    class="fs-5 fw-bold text-end @(party.TransactionType.ToString() == "GAVE" ? "text-danger" : "text-success")">
+                    ₹
+                    @Math.Abs((decimal)party.Amount)</div>
+                <div class="text-secondary">YOU'LL @(party.TransactionType.ToString() == "GAVE" ? "GET" : "GIVE")</div>
+            }
+        </div>
+    </div>
+}
+}
+
+
+<partial name="_ValidationScriptsPartial" />
+<partial name="_Toaster" />
+
+<script>
+    $(document).ready(function () {
+        partyTimeDisplay();
+    })
+    function partyTimeDisplay() {
+        var partyTimeHidden = document.getElementsByClassName("party-created-time-hidden");
+        var partyTime = document.getElementsByClassName("party-created-time");
+        for (i = 0; i < partyTimeHidden.length; i++) {
+            var curdate = Date.now();
+            var partyDate = partyTimeHidden[i].parentElement.children[1].innerHTML;
+            var Dateonly = partyDate.split(" ");
+            var partyDay = Dateonly[0].split("-")[0];
+            var partyMonth = Dateonly[0].split("-")[1];
+            var partyYear = Dateonly[0].split("-")[2];
+            var partyDateformated = partyYear + "-" + partyMonth + "-" + partyDay + "T" + Dateonly[1];
+            var partyDateToCal = new Date(partyDateformated);
+            var timeDiff = curdate - partyDateToCal;
+
+            const timeDiffYear = Math.floor(timeDiff / (12 * 30 * 24 * 60 * 60 * 1000));
+            const timeDiffMonth = Math.floor(timeDiff / (30 * 24 * 60 * 60 * 1000));
+            const timeDiffday = Math.floor(timeDiff / (24 * 60 * 60 * 1000));
+            const daysms = timeDiff % (24 * 60 * 60 * 1000);
+            const timeDiffHours = Math.floor(daysms / (60 * 60 * 1000));
+            const hoursms = timeDiff % (60 * 60 * 1000);
+            const timeDiffMins = Math.floor(hoursms / (60 * 1000));
+            const minutesms = timeDiff % (60 * 1000);
+            const timeDiffSecs = Math.floor(minutesms / 1000);
+            if (timeDiffYear != 0) {
+                if (timeDiffYear == 1)
+                    partyTime[i].innerHTML = "a year ago"
+                else
+                    partyTime[i].innerHTML = timeDiffYear + " year ago"
+            }
+            else if (timeDiffMonth != 0) {
+                if (timeDiffMonth == 1)
+                    partyTime[i].innerHTML = "a month ago"
+                else
+                    partyTime[i].innerHTML = timeDiffMonth + " months ago"
+            } else if (timeDiffday != 0) {
+                if (timeDiffday == 1)
+                    partyTime[i].innerHTML = "a day ago"
+                else
+                    partyTime[i].innerHTML = timeDiffday + " days ago"
+            } else if (timeDiffHours != 0) {
+                if (timeDiffHours == 1)
+                    partyTime[i].innerHTML = "an hour ago"
+                else
+                    partyTime[i].innerHTML = timeDiffHours + " hours ago"
+            } else if (timeDiffMins != 0) {
+                if (timeDiffMins == 1)
+                    partyTime[i].innerHTML = "a minute ago"
+                else
+                    partyTime[i].innerHTML = timeDiffMins + " minutes ago"
+            }
+            else {
+                partyTime[i].innerHTML = "a few seconds ago"
+            }
+        }
+    }
+
+    var displaytime = window.setInterval(function () {
+        partyTimeDisplay()
+    }, 10000);
+
+</script>

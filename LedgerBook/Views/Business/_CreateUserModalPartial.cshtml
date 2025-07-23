@@ -1,0 +1,113 @@
+@using DataAccessLayer.ViewModels;
+@model BusinessMainViewModel;
+
+<div class="modal-content bg-light shadow-lg border-2">
+    <div class="modal-header">
+        <h5 class="modal-title" id="add-user-modal-title">Add User</h5>
+        <button type="button" class="btn-close usermodal-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <form id="add-newuser-form-id">
+        <div class="modal-body row">
+            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                <div class="form-floating ">
+                    <input type="hidden" id="userId-User" asp-for="@Model.UserPermissionViewModel.UserDetail.UserId">
+                    <input type="hidden" asp-for="@Model.UserPermissionViewModel.UserDetail.PersonalDetailId">
+                    @* <input type="hidden" asp-for="@Model.UserPermissionViewModel.UserDetail.IsAddedByBusinessOwner" value="true"> *@
+                    <input type="text" oninput="RemoveWhiteSpace(this)" asp-for="@Model.UserPermissionViewModel.UserDetail.FirstName"
+                        class="form-control" id="firstName-user" placeholder="First Name*">
+                    <input type="hidden" asp-for="@Model.UserPermissionViewModel.UserDetail.FirstName">
+                    <label for="firstName-user" asp-for="@Model.UserPermissionViewModel.UserDetail.FirstName"
+                        class="fs-6 text-secondary">First
+                        Name*</label>
+                    <span asp-validation-for="@Model.UserPermissionViewModel.UserDetail.FirstName"
+                        class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                <div class="form-floating ">
+                    <input type="text" oninput="RemoveWhiteSpace(this)" asp-for="@Model.UserPermissionViewModel.UserDetail.LastName" class="form-control"
+                        id="lastName-user" placeholder="Last Name*">
+                    <label for="lastName-user" asp-for="@Model.UserPermissionViewModel.UserDetail.LastName"
+                        class="fs-6 text-secondary">Last Name*</label>
+                    <input type="hidden" asp-for="@Model.UserPermissionViewModel.UserDetail.LastName">
+                    <span asp-validation-for="@Model.UserPermissionViewModel.UserDetail.LastName"
+                        class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                <div class="form-floating ">
+                    <input type="text" oninput="RemoveWhiteSpace(this)" asp-for="@Model.UserPermissionViewModel.UserDetail.Email" class="form-control"
+                        id="email-user" placeholder="Email*">
+                    <input type="hidden" asp-for="@Model.UserPermissionViewModel.UserDetail.Email">
+
+                    <label for="email-user" asp-for="@Model.UserPermissionViewModel.UserDetail.Email"
+                        class="fs-6 text-secondary">Email*</label>
+                    <span asp-validation-for="@Model.UserPermissionViewModel.UserDetail.Email"
+                        class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-6 col-xl-6 col-sm-12 col-12 mt-3">
+                <div class="form-floating ">
+                    <input type="Number" oninput="NumberValidation(this)" asp-for="@Model.UserPermissionViewModel.UserDetail.MobileNumber"
+                        class="form-control" id="mobileNumber-user" placeholder="Mobile Number*">
+                    <label for="mobileNumber-user" asp-for="@Model.UserPermissionViewModel.UserDetail.MobileNumber"
+                        class="fs-6 text-secondary">Mobile Number*</label>
+                    <input type="hidden" asp-for="@Model.UserPermissionViewModel.UserDetail.MobileNumber">
+                    <span asp-validation-for="@Model.UserPermissionViewModel.UserDetail.MobileNumber"
+                        class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-12 mt-3">
+                <div>Roles </div>
+                <div class="form-floating d-flex">
+
+                @if (Model.UserPermissionViewModel.UserDetail.UserId != 0)
+                {
+                    @foreach (var item in Model.BusinessDetailViewModel.Roles)
+                    {
+
+                        bool isSelected = false;
+
+                        if (Model.UserPermissionViewModel != null && Model.UserPermissionViewModel.UserDetail != null &&
+                                    Model.UserPermissionViewModel.UserDetail.Roles.Any(a => a.RoleId == item.RoleId)){
+                            isSelected = true;
+                        }
+                                    
+                            <div class="form-check me-2">
+                                <input class="form-check-input role-checkbox" type="checkbox" id="role-{@item.RoleId}" data-roleId="@item.RoleId" @(isSelected == true?"checked":"")>
+                                                <label class="form-check-label"
+                                                for="role-{@item.RoleId}">
+                                                @item.RoleName
+                                            </label>
+                            </div>
+                    }
+                }
+                else
+                {
+                    @foreach (var role in Model.BusinessDetailViewModel.Roles)
+                    {
+                        <div class="form-check me-2">
+                            <input class="form-check-input role-checkbox" type="checkbox" id="role-{@role.RoleId}"
+                                data-roleId="@role.RoleId">
+                            <label class="form-check-label" for="role-{@role.RoleId}">
+                                @role.RoleName
+                            </label>
+                        </div>
+                    }
+                }
+                    
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+    </form>
+</div>
+
+
+<partial name="_ValidationScriptsPartial" />

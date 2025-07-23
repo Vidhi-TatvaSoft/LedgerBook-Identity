@@ -1,0 +1,66 @@
+@using DataAccessLayer.Constant
+@using DataAccessLayer.ViewModels;
+@model ReportTransactionEntriesViewModel;
+
+<div class="p-2">
+    <div class="ms-4">Total 5 entries</div>
+    <div class="row gap-2 mt-2 ms-4">
+        <div class="border p-3 rounded bg-light col-2 d-flex flex-column align-items-start">
+            <div class="fs-4 fw-bold">₹ @Model.youGave</div>
+            <div class="fs-6 fw-bold text-danger">You Gave</div>
+        </div>
+        <div class="border p-3 rounded bg-light col-2 d-flex flex-column align-items-start">
+            <div class="fs-4 fw-bold">₹ @Model.YouGot</div>
+            <div class="fs-6 fw-bold text-success">You Got</div>
+        </div>
+        <div class="border p-3 rounded bg-light col-2 d-flex flex-column align-items-start">
+            <div class="fs-4 fw-bold @(Model.NetBalance < 0 ? "text-danger" : "text-success")">₹@Model.NetBalance</div>
+            <div class="fs-6 fw-bold text-secondary">Net Balance</div>
+        </div>
+    </div>
+</div>
+<div class="p-2 ms-4">
+    <div class="table-responsive p-0" id="entry-table-report-id">
+        <table class="table table-hover table-borderless1 p-0">
+            <thead>
+                <th class="text-start text-nowrap">Date</th>
+                <th class="text-start text-nowrap">Party Name</th>
+                <th class="text-center text-nowrap">DETAILS</th>
+                <th class="text-end text-nowrap">YOU GAVE</th>
+                <th class="text-end text-nowrap">YOU GOT</th>
+            </thead>
+            <tbody>
+                @if (Model.TransactionsList.Count != 0)
+                {
+                    @foreach (var entry in Model.TransactionsList)
+                    {
+                        <tr>
+                            <td class="text-start text-nowrap">@entry.CreateDate</td>
+                            <td class="text-start text-nowrap">@entry.PartyName</td>
+                            <td class="text-center text-nowrap">-</td>
+                            @if (entry.TransactionType == (byte)EnumHelper.TransactionType.GAVE)
+                            {
+                                <td class="text-end text-nowrap">₹ @entry.TransactionAmount</td>
+                                <td class="text-end text-nowrap">₹ 0</td>
+                            }
+                            else
+                            {
+                                <td class="text-end text-nowrap">₹ 0</td>
+                                <td class="text-end text-nowrap">₹ @entry.TransactionAmount</td>
+                            }
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center fs-4 ">
+                            No entries found
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+</div>

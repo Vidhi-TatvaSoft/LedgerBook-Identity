@@ -1,0 +1,111 @@
+@using DataAccessLayer.ViewModels;
+@model LoginViewModel;
+
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<div id="login-signup-form-id"></div>
+
+@section Scripts {
+    <script type="module" src="~/js/constant.js"></script>
+    <script>
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#Email").keydown(function (event) {
+                if (event.keyCode == 9) {
+                    if ($("#Email").val().trim() == "") {
+                        $("#Email").val("");
+                        $("#emailValidationMessage").html(constant.EmailRequireMessage);
+                    } else {
+                        $("#emailValidationMessage").html("");
+                    }
+                }
+            });
+            $("#pass-inp").keydown(function (event) {
+                if (event.keyCode == 9) {
+                    if ($("#pass-inp").val().trim() == "") {
+                        $("#pass-inp").val("");
+                        $("#passwordValidationMessage").html(constant.PasswordRequireMessage);
+                    } else {
+                        $("#passwordValidationMessage").html("");
+                    }
+                }
+            });
+
+            $(document).on("submit", "#login-form-id", function (e) {
+                e.preventDefault();
+                let form = $("#login-form-id")
+                if (form.valid()) {
+                    let formData = new FormData(this);
+                    $.ajax({
+                        url: "/Login/Login",
+                        type: "POST",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function (response) {
+                            HandleResponse(response, "#login-signup-form-id");
+                        }
+                    })
+                }
+            })
+
+
+            $(document).on("submit", "#registrationForm", function (e) {
+                e.preventDefault();
+                let form = $("#registrationForm")
+                if (form.valid()) {
+                    let formData = new FormData(this);
+                    $.ajax({
+                        url: "/Login/Registration",
+                        type: "POST",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function (response) {
+                            HandleResponse(response, "#login-signup-form-id");
+                        }
+                    })
+                }
+            })
+
+            $(document).on("submit", "#forgotpassword-form-id", function (e) {
+                e.preventDefault();
+                let form = $("#forgotpassword-form-id")
+                if (form.valid()) {
+                    let formData = new FormData(this);
+                    $.ajax({
+                        url: "/Login/ForgotPassword",
+                        type: "POST",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function (response) {
+                            HandleResponse(response, "#login-signup-form-id");
+                        }
+                    })
+                }
+            })
+
+            $(document).on("click", "#forgot-password", function (e) {
+                e.preventDefault();
+                document.title = "Forgot password - LedgerBook";
+                let email = document.getElementById("email").value
+                $.ajax({
+                    url: "/Login/ForgotPassword",
+                    type: "GET",
+                    data: { email },
+                    success: function (response) {
+                        HandleResponse(response, "#login-signup-form-id");
+                    }
+                })
+            })
+        });
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+}

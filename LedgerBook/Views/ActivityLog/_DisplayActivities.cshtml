@@ -1,0 +1,126 @@
+@using BusinessAcessLayer.Constant
+@using DataAccessLayer.Constant
+@using DataAccessLayer.ViewModels;
+@model PaginationViewModel<ActivityLogsViewModel>;
+
+<div class="">
+    <div class="activity-div p-2 table-responsive">
+        <table class="table display">
+            <thead>
+                <tr>
+                    <th class="text-nowrap col-1">Date</th>
+                    <th class="text-nowrap text-center col-2">Time</th>
+                    <th class="text-nowrap col">Activity</th>
+                </tr>
+            </thead>
+            <tbody class="">
+@if (Model.Items.Count != 0)
+{
+    @foreach (var activity in Model.Items)
+    {
+                        <tr>
+                            <td class="text-nowrap ">@activity.ActivityDate</td>
+                            <td class="text-nowrap text-center">@activity.ActivityTime</td>
+                            <td class="text-nowrap">
+                                @switch(activity.EntityType){
+                                    case EnumHelper.ActivityEntityType.User:
+                                        @switch (activity.Action)
+                                        {
+                                            case EnumHelper.Actiontype.Add:
+                                                @string.Format(Messages.UserActivity,"User","added");
+                                                break;
+                                            case EnumHelper.Actiontype.Update:
+                                                @string.Format(Messages.BusinessActivity,"User","updated",activity.createdByName);
+                                                break;
+                                            case EnumHelper.Actiontype.Delete:
+                                            break;
+                                        }
+                                        break;
+                                    case EnumHelper.ActivityEntityType.Business:
+                                        if(activity.SubEntityType != null){
+                                            switch(activity.SubEntityType){
+                                                case EnumHelper.ActivityEntityType.Party:
+                                                    @switch (activity.Action)
+                                                    {
+                                                        case EnumHelper.Actiontype.Add:
+                                                            @string.Format(Messages.PartyActivity,activity.PartyType, activity.PartyName,"added", activity.EntityTypeName,activity.createdByName);
+                                                            break;
+                                                        case EnumHelper.Actiontype.Update:
+                                                            @string.Format(Messages.PartyUpdateActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"updated",activity.createdByName);
+                                                            break;
+                                                        case EnumHelper.Actiontype.Delete:
+                                                            break;
+                                                    }
+                                                break;
+                                                case EnumHelper.ActivityEntityType.Transaction:
+                                                    @if(activity.IsSettled){
+                                                            @string.Format(Messages.TransactionActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"mark as paid",activity.createdByName);
+                                                    }else{
+                                                        @switch (activity.Action)
+                                                        {
+                                                            case EnumHelper.Actiontype.Add:
+                                                                @string.Format(Messages.TransactionAddActivity,activity.PartyType, activity.PartyName,activity.TransactionAMount, activity.EntityTypeName,activity.createdByName);
+                                                                break;
+                                                            case EnumHelper.Actiontype.Update:
+                                                                @string.Format(Messages.TransactionActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"updated",activity.createdByName);
+                                                                break;
+                                                            case EnumHelper.Actiontype.Delete:
+                                                                @string.Format(Messages.TransactionActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"deleted",activity.createdByName);
+                                                                break;
+                                                        } 
+                                                    }
+                                                break;
+                                                case EnumHelper.ActivityEntityType.Role:
+                                                    @switch (activity.Action)
+                                                    {
+                                                        case EnumHelper.Actiontype.Add:
+                                                            @string.Format(Messages.AddUserInBusinessActivity, activity.SubEntityTypeName,activity.createdByName);
+                                                            break;
+                                                        case EnumHelper.Actiontype.Update:
+                                                            @if(activity.IsActive || activity.IsInactive){
+                                                                @if(activity.IsActive){
+                                                                @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "activated", activity.createdByName);
+
+                                                                }else{
+                                                                @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "inactivated", activity.createdByName);
+                                                                }
+                                                            }else{
+                                                                @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "updated", activity.createdByName);
+                                                            }
+                                                            break;
+                                                        case EnumHelper.Actiontype.Delete:
+                                                            @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "deleted", activity.createdByName);
+                                                            break;
+                                                    } 
+                                                    break;
+                                            }
+                                        }else{
+                                             @switch (activity.Action)
+                                            {
+                                                case EnumHelper.Actiontype.Add:
+                                                    @string.Format(Messages.BusinessActivity,"Business","added",activity.createdByName);
+                                                    break;
+                                                case EnumHelper.Actiontype.Update:
+                                                    @string.Format(Messages.BusinessActivity,"Business","updated",activity.createdByName);
+                                                    break;
+                                                case EnumHelper.Actiontype.Delete:
+                                                    @string.Format(Messages.BusinessActivity,"Business","deleted",activity.createdByName);
+                                                    break;
+                                            }
+                                        }
+                                    break;
+                                }
+                                
+                            </td>
+                        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td colspan="3" class="fs-4 fw-bold text-center">No activities found</td>
+    </tr>
+}
+<input type = "hidden" value = "@Model.TotalCount" id = "totalCount" >
+
+

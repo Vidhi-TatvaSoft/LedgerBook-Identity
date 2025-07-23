@@ -1,0 +1,20 @@
+@using DataAccessLayer.ViewModels;
+@model TotalAmountViewModel
+
+<div class="col-6 fs-5 fw-semibold ">You'll Give: <span class="fw-bold text-success">
+        @if (Model.AmountToGive == 0)
+        {
+            @Math.Abs(0)
+        }else{
+            @Math.Abs(Model.AmountToGive)
+        }<i class="bi bi-arrow-up-right ms-2"></i>
+    </span></div>
+<div class="col-6 fs-5 fw-semibold ">You'll Get: <span class="fw-bold text-danger">
+     @if (Model.AmountToGet == 0)
+        {
+            @Math.Abs(0)
+        }else{
+            @Math.Abs(Model.AmountToGet)
+        }<i class="bi bi-arrow-down-right ms-2"></i>
+</span>
+</div>

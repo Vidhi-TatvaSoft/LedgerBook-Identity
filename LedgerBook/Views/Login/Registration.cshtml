@@ -1,0 +1,84 @@
+@using DataAccessLayer.ViewModels;
+@model RegistrationViewModel;
+
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+@* <div class="container-fluid" style="height: 100vh; position: relative;">
+    <div class="login-container row" style="height: 100%;">
+        <!-- Image Section (Left on big screens) -->
+        <div class="col-md-6 d-none d-md-block main-img-div"
+            style="height: 100%; background-image: url('/images/login-image.jpg'); background-size: cover; background-position: center;">
+        </div>
+        <!-- Registration Section (Right on big screens, centered on small screens) -->
+        <div class="col-12 col-md-6 d-flex flex-column justify-content-center align-items-center" style="height: 100%;">
+            <div class="login-main-div text-center p-4 bg-white bg-opacity-75 rounded"
+                style="max-width: 800px; width: 100%; margin: auto;">
+                <!-- Logo -->
+                <div class="d-flex align-items-center justify-content-center mb-4">
+                    <img src="~/images/logo.jpg" alt="Logo" class="img-fluid rounded-circle mainImage" />
+                    <h4 class="logo-name text-color ms-sm-2 fw-bold fs-1">Register to Ledger Book</h4>
+                </div> *@
+
+                <!-- Registration Form -->
+                
+            @* </div>
+        </div>
+    </div>
+</div> *@
+
+@section Scripts {
+    <script type="module" src="~/js/constant.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#FirstName").keydown(function (event) {
+                if (event.keyCode == 9) {
+                    if ($("#FirstName").val().trim() == "") {
+                        $("#FistNameValidationMessage").html("First name is Required");
+                    } else {
+                        $("#FistNameValidationMessage").html("");
+                    }
+                }
+            });
+            $("#LastName").keydown(function (event) {
+                if (event.keyCode == 9) {
+                    if ($("#LastName").val().trim() == "") {
+                        $("#LastNameValidationMessage").html("Last name is Required");
+                    } else {
+                        $("#LastNameValidationMessage").html("");
+                    }
+                }
+            });
+            $("#email").keydown(function (event) {
+                if (event.keyCode == 9) {
+                    if ($("#email").val().trim() == "") {
+                        $("#emailValidationMessage").html(constant.EmailRequireMessage);
+                    } else {
+                        $("#emailValidationMessage").html("");
+                    }
+                }
+            });
+            $("#password").keydown(function (event) {
+                if (event.keyCode == 9) {
+                    if ($("#password").val().trim() == "") {
+                        $("#passwordValidationMessage").html(constant.PasswordRequireMessage);
+                    } else {
+                        $("#passwordValidationMessage").html("");
+                    }
+                }
+            });
+            $("#confirmPassword").keydown(function (event) {
+                if (event.keyCode == 9) {
+                    if ($("#confirmPassword").val().trim() == "") {
+                        $("#confirmPasswordValidationMessage").html(constant.ConfirmPasswordRequireMessage);
+                    } else {
+                        $("#confirmPasswordValidationMessage").html("");
+                    }
+                }
+            });
+        });
+    </script>
+    <partial name="_ValidationScriptsPartial" />
+}

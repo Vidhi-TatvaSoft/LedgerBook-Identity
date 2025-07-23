@@ -1,0 +1,584 @@
+@using DataAccessLayer.ViewModels;
+@model BusinessMainViewModel;
+
+@{
+    ViewData["Title"] = "Business";
+    Layout = "~/Views/Shared/_BusinessCardLayout.cshtml";
+}
+
+<div class="" id="ledgerbook-body">
+
+    <div class="main-container px-4 mt-3">
+        <div class="d-flex justify-content-between flex-column flex-sm-row">
+            <div class="heading fs-2 fw-bold text-color mb-3">Businesses</div>
+            <span class="d-flex">
+                <input type="text" id="BusinessSearch" class="form-control mt-3 me-3"
+                    style="height:35px; width:100% !important;" placeholder="Search" oninput="RemoveWhiteSpace(this)" />
+                <span class="text-color fs-6 fw-bold btn text-nowrap btn-primary mt-3 cursor-pointer "
+                    style="height:35px; width:100% !important;" data-toggle="tooltip" data-placement="top"
+                    title="Add business" data-bs-toggle="modal" data-bs-target="#add-business-modal"
+                    onclick="addBusinessModal()">Add Business</span>
+            </span>
+        </div>
+
+        <!--------------------------------------------- Business cards---------------------------------------------->
+        <div class="business-cards-scroll d-flex row justify-content-center gap-3 mt-5 " id="businss-cards">
+        </div>
+    </div>
+</div>
+
+<!-------------------------------------- Modal--------------------------------------------------->
+<div id="add-business-modal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl" id="modal-body-id">
+
+    </div>
+</div>
+
+<div id="deleteBusiness-confirmation-modal" class="fade modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add-user-modal-title">Delete business confirmation</h5>
+                <button type="button" class="btn-close user-delete-modal-close-btn" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body ">
+                <div class="delete-cat-image d-flex flex-column  align-items-center">
+                    <p>Are you sure you want to delete this business?</p>
+                    <input type="hidden" id="businessId-delete">
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <a type="submit" class="btn btn-primary" onclick="deleteBusinessYes()">Yes</a>
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script type="module" src="~/js/constant.js"></script>
+
+    <script>
+        var businessDetailsVM;
+
+        //Display Business cards when page reload
+        function displayBusinessCards(searchText = "") {
+            if (searchText.trim())
+                $("body").addClass("loading");
+
+            $.ajax({
+                url: "/Business/GetBusinesses",
+                type: "GET",
+                data: { searchText: searchText },
+                success: function (response) {
+                    IsHtmlDoc(response);
+                    $("#businss-cards").html(response);
+                }
+            })
+            $("body").removeClass("loading");
+        }
+
+        //debounce function for search business
+        function debounce(func, delay) {
+            let timeoutId; // Variable to store the timer ID
+
+            return function (...args) {
+                clearTimeout(timeoutId);
+
+                timeoutId = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
+            };
+        }
+
+        const handleSearch = (event) => {
+            console.log('Searching for:', event.target.value);
+            let searchText = event.target.value;
+            displayBusinessCards(searchText)
+        };
+
+        const debouncedSearch = debounce(handleSearch, 500);
+        const searchInput = document.getElementById('BusinessSearch');
+        searchInput.addEventListener('input', debouncedSearch);
+
+
+        //fill data everytime partial view of add edit business modal renders
+        function fillBusinessDetailsVM(businessDetails) {
+            businessDetailsVM = businessDetails
+        }
+
+        //render partial view of add-business-modal 
+        function addBusinessModal() {
+            $("body").addClass("loading");
+            $.ajax({
+                url: "/Business/CreateBusinessModalDisplay",
+                type: "GET",
+                success: function (response) {
+                    IsHtmlDoc(response);
+                    $("#modal-body-id").html(response);
+                    $("#MobileNumber-business").val("");
+                },
+                error: function (xhr, status, error) {
+                    $("body").removeClass("loading");
+                    $('.btn-close').click();
+                    displayBusinessCards();
+                }
+            });
+            $("body").removeClass("loading");
+        }
+
+        //Display business details in add-business-modal
+        function displayBusinessDetails() {
+            $("body").addClass("loading");
+            $.ajax({
+                url: "/Business/DisplayBusinessDetails",
+                type: "POST",
+                data: { businessVM: JSON.stringify(businessDetailsVM) },
+                success: function (response) {
+                    $("body").removeClass("loading");
+                    IsHtmlDoc(response);
+                    $("#modal-body-id").html(response);
+                    $("#browseFileText").text(
+                        businessDetailsVM.businessDetailViewModel.businessItem == null ||
+                            businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment == null ||
+                            businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment.fileName == null
+
+                            ? "Browse File" : businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment.fileName);
+
+                }
+            })
+        }
+
+        //render user details in add-business-modal
+        function displayUserDetails() {
+            $("body").addClass("loading");
+            document.getElementById("business-details-btn").classList.replace("active-div", "inactive-div")
+            document.getElementById("user-details-btn").classList.replace("inactive-div", "active-div")
+            $.ajax({
+                url: "/Business/DisplayUserDetails",
+                type: "POST",
+                data: { businessVM: JSON.stringify(businessDetailsVM) },
+                success: function (response) {
+                    $("body").removeClass("loading");
+                    IsHtmlDoc(response);
+                    $("#modal-body-id").html(response);
+                }
+            })
+        }
+
+        //update business modal
+        function updateBusiness(businessId) {
+            $("body").addClass("loading");
+
+            $.ajax({
+                url: "/Business/CreateBusinessModalDisplay",
+                type: "GET",
+                data: { businessId },
+                success: function (response) {
+                    $("body").removeClass("loading");
+                    IsHtmlDoc(response);
+                    $("#modal-body-id").html(response);
+                    setTimeout(function () {
+                        $("#browseFileText").text(
+                            businessDetailsVM.businessDetailViewModel.businessItem == null ||
+                                businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment == null ||
+                                businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment.fileName == null
+                                ? "Browse File" : businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment.fileName);
+                    }, 50)
+                }
+            });
+        }
+
+
+        //render user details
+        function renderUserDetails() {
+            $('.userdetail-confirmation-modal-close').click();
+            let businessId = businessDetailsVM.businessDetailViewModel.businessItem.businessId;
+            if (businessId == 0) {
+                Toaster("Something went wrong. Try again later")
+                //error message to create business first
+            } else {
+                $.ajax({
+                    url: "/Business/GetUsersByBusiness",
+                    type: "POST",
+                    data: { businessVM: JSON.stringify(businessDetailsVM) },
+                    success: function (response) {
+                        IsHtmlDoc(response);
+                        $("#modal-body-id").html(response);
+                    }
+                })
+            }
+        }
+
+        //close add business modal
+        function closeModal() {
+            $('.btn-close').click();
+            displayBusinessCards();
+        }
+
+        function updateUser(userId) {
+            $.ajax({
+                url: "/Business/RenderCreateUserModal",
+                type: "GET",
+                data: { userId, businessId: businessDetailsVM.businessDetailViewModel.businessItem.businessId },
+                success: function (response) {
+                    IsHtmlDoc(response);
+                    $("#craete-user-modal-content").html(response);
+                    $("#email-user").prop("disabled", true);
+                    let roles = $(".role-checkbox");
+                    let selectedRoles = []
+                    for (i = 0; i < businessDetailsVM.userPermissionViewModel.users; i++) {
+                        if (businessDetailsVM.userPermissionViewModel.users[i].userId == userId) {
+                            for (j = 0; j < businessDetailsVM.userPermissionViewModel.users[i].roles.length; j++) {
+                                selectedRoles.push(businessDetailsVM.userPermissionViewModel.users[i].roles[j].roleId);
+                                $(`role-${businessDetailsVM.userPermissionViewModel.users[i].roles[j].roleId}`).prop("checked", true);
+                            }
+                        }
+
+                    }
+                }
+            });
+        }
+
+        function DisplayRoles() {
+            document.getElementById("list-roles").classList.toggle("d-none");
+        }
+
+        function delteUserModal(userId, roleId) {
+            $("#userId").val(userId);
+            $("#roleId").val(roleId);
+
+        }
+
+        function deleteUser() {
+            $("body").addClass("loading");
+            let userId = $("#userId").val()
+            let roleId = $("#roleId").val()
+            $.ajax({
+                url: "/Business/DeleteUserFromBusiness",
+                type: "POST",
+                data: { userId, roleId, businessId: businessDetailsVM.businessDetailViewModel.businessItem.businessId, businessVM: JSON.stringify(businessDetailsVM) },
+                success: function (response) {
+                    $("body").removeClass("loading");
+                    IsHtmlDoc(response);
+                    $(".user-delete-modal-close-btn").click();
+                    $("#modal-body-id").html(response);
+                    Toaster("User deleted successfully")
+                }
+            })
+        }
+
+        function ManageBusinessDetails(businessId) {
+            $.ajax({
+                url: "/Business/SetBusinessCookie",
+                type: "POST",
+                data: { businessId },
+                success: function (response) {
+                    if (response.success) {
+                        window.location = "/Party/CheckRolePermission"
+                    } else {
+                        displayBusinessCards();
+                    }
+                }
+            })
+        }
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            displayBusinessCards();
+
+            $(document).on("click", "#temp-id", function (e) {
+            })
+
+            //save business details into view model and render user details partial view
+            $(document).on("submit", "#business-details-form-id", function (e) {
+                e.preventDefault();
+
+            })
+
+            //create new user in user details partial view
+            $(document).on("submit", "#add-newuser-form-id", function (e) {
+                e.preventDefault();
+                let userId;
+                if (businessDetailsVM.userPermissionViewModel.users != null) {
+                    let email = $("#email-user").val();
+                    userId = $("#userId-User").val();
+                    if (userId == 0) {
+                        for (i = 0; i < businessDetailsVM.userPermissionViewModel.users.length; i++) {
+                            if (businessDetailsVM.userPermissionViewModel.users[i].email.toLowerCase().trim() == email.toLowerCase().trim()) {
+                                Toaster(constant.UserAlreadyExist, "error")
+                                $(".usermodal-close-btn").click();
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                let roles = $(".role-checkbox");
+                let selectedRoles = [];
+                for (i = 0; i < roles.length; i++) {
+                    if (roles[i].checked) {
+                        selectedRoles.push(roles[i].getAttribute("data-roleId"));
+                    }
+                }
+                if (selectedRoles.length == 0) {
+                    Toaster(constant.RoleRequireMessage, "error");
+                    return;
+                }
+                let form = $("#add-newuser-form-id")
+                if (form.valid()) {
+                    let formData = new FormData(this);
+
+                    formData.append('businessViewModelString', JSON.stringify(businessDetailsVM))
+                    formData.append('mappingRoles', JSON.stringify(selectedRoles))
+
+                        $.ajax({
+                            url: "/Business/IsUserSameAsLoginUser",
+                            type: "POST",
+                            contentType: false,
+                            processData: false,
+                            data: formData,
+                            success: function (res) {
+                                if (res) {
+                                    Toaster(constant.UserExistWithRole, "error");
+                                    $(".usermodal-close-btn").click();
+                                    $("body").removeClass("loading");
+                                    return;
+                                } else {
+                                    $.ajax({
+                                        url: "/Business/IsUserMainOwner",
+                                        type: "POST",
+                                        contentType: false,
+                                        processData: false,
+                                        data: formData,
+                                        success: function (res) {
+                                            if (res) {
+                                                Toaster("You dont have permission to edit owner's role", "error");
+                                                $(".usermodal-close-btn").click();
+                                                $("body").removeClass("loading");
+                                                return;
+                                            } else {
+                                                $(".usermodal-close-btn").click();
+                                                $("body").removeClass("loading");
+                                                $.ajax({
+                                                    url: "/Business/CreateUser",
+                                                    type: "POST",
+                                                    contentType: false,
+                                                    processData: false,
+                                                    data: formData,
+                                                    success: function (response) {
+                                                        if (!response) {
+                                                            Toaster("Something went wrong. Please try again later.", "error")
+                                                        } else {
+                                                            $("#modal-body-id").html(response);
+                                                            if (userId == 0) {
+                                                                Toaster("User added successfully")
+                                                            } else {
+                                                                Toaster("User updated successfully")
+                                                            }
+                                                        }
+                                                    }
+                                                })
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+                        })
+
+                }
+            })
+
+            //Display modal of create user
+            $(document).on("click", "#add-user-icon", function () {
+                $("#add-user-modal-title").html("Add User");
+
+                $.ajax({
+                    url: "/Business/RenderCreateUserModal",
+                    type: "GET",
+                    data: { businessId: businessDetailsVM.businessDetailViewModel.businessItem.businessId },
+                    success: function (response) {
+                        IsHtmlDoc(response);
+                        $("#craete-user-modal-content").html(response);
+                        $("#mobileNumber-user").val("");
+
+                    }
+                });
+            })
+
+        })
+    </script>
+
+    <script>
+        //all validations using js
+        function NumberValidation(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 10) {
+                value = value.slice(0, 10);
+            }
+            input.value = value;
+        }
+
+        function PincodeValidation(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 6) {
+                value = value.slice(0, 6);
+            }
+            input.value = value;
+        }
+
+        function RemoveWhiteSpace(input) {
+            let value = input.value;
+
+            value = value.replace(/\s/g, '');
+            input.value = value;
+        }
+
+        function TrimInput(input) {
+            let value = input.value;
+            value = value.trim();
+            input.value = value;
+        }
+    </script>
+
+    @* //Save & Close *@
+    <script>
+
+        //to save a new business without close
+        function SaveBusiness() {
+            let businessId = businessDetailsVM.businessDetailViewModel.businessItem.businessId;
+            let form = $("#business-details-form-id")
+            let form1 = document.getElementById("business-details-form-id")
+            if (form.valid()) {
+                let formData = new FormData(form1);
+                formData.append('businessViewModelString', JSON.stringify(businessDetailsVM))
+
+                $.ajax({
+                    url: "/Business/SaveBusiness",
+                    type: "POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success: function (response) {
+                        if (!response) {
+                            Toaster(constant.GlobalExceptionMessage, "error")
+                            $('.btn-clode').click();
+                        } else {
+                            IsHtmlDoc(response);
+                            $("#modal-body-id").html(response);
+                            if (businessId == 0) {
+                                $("#user-details-confirmation-modal").modal('show');
+                            } else {
+                                Toaster(constant.BussnessUpdateMessage)
+                                setTimeout(function () {
+                                    $("#browseFileText").text(
+                                        businessDetailsVM.businessDetailViewModel.businessItem == null ||
+                                            businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment == null ||
+                                            businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment.fileName == null
+                                            ? "Browse File" : businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment.fileName);
+                                }, 50)
+                            }
+                        }
+                    }
+                })
+            }
+        }
+
+        function SaveAndCloseBusiness() {
+            let businessId = businessDetailsVM.businessDetailViewModel.businessItem.businessId;
+            let form = $("#business-details-form-id")
+            let form1 = document.getElementById("business-details-form-id")
+            if (form.valid()) {
+                let formData = new FormData(form1);
+                formData.append('businessViewModelString', JSON.stringify(businessDetailsVM))
+
+                $.ajax({
+                    url: "/Business/SaveBusiness",
+                    type: "POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success: function (response) {
+                        if (!response) {
+                            Toaster(constant.GlobalExceptionMessage, "error")
+                        } else {
+                            IsHtmlDoc(response);
+                            if (businessId == 0) {
+                                Toaster(constant.BussnessAddMessage)
+                            } else {
+                                Toaster(constant.BussnessUpdateMessage)
+                            }
+                        }
+                        $('.btn-close').click();
+                    }
+                })
+            }
+        }
+
+        //delete business
+        function deleteBusinessmodal(businessId) {
+            $("#businessId-delete").val(businessId);
+        }
+
+        //delete business submit
+        function deleteBusinessYes() {
+            let businessId = $("#businessId-delete").val();
+            $.ajax({
+                url: "/Business/DeleteBusiness",
+                type: "GET",
+                data: { businessId },
+                success: function (response) {
+                    if (response.success) {
+                        Toaster(response.message);
+                    } else {
+                        Toaster(response.message, "error");
+                    }
+                    $(".btn-close").click();
+                    displayBusinessCards();
+                }
+            })
+
+        }
+
+
+        function toggleActive(userId) {
+            let userActiveIcon = document.getElementById(`active-user-${userId}`);
+            if (userActiveIcon.classList.contains("fa-circle-check")) {
+                let modalbody = document.getElementById("inactive-user-modal").innerHTML.toString().replace("{{status}}", "Inactive").replace("{{statusbody}}", "inactivate");
+                document.getElementById("inactive-user-modal").innerHTML = modalbody
+            } else {
+                let modalbody = document.getElementById("inactive-user-modal").innerHTML.toString().replace("{{status}}", "Active").replace("{{statusbody}}", "activate");
+                document.getElementById("inactive-user-modal").innerHTML = modalbody
+            }
+            $("#userId-active").val(userId);
+        }
+
+        function ActiveInactiveUser() {
+            $("body").addClass("loading");
+            let userId = $("#userId-active").val()
+            console.log(userId)
+            let isActive = document.getElementById(`active-user-${userId}`).classList.contains("fa-circle-check") ? false : true
+            $.ajax({
+                url: "/Business/ActiveInactiveUser",
+                type: "POST",
+                data: { userId, isActive, businessId: businessDetailsVM.businessDetailViewModel.businessItem.businessId, businessVM: JSON.stringify(businessDetailsVM) },
+                success: function (response) {
+                    $(".user-inactive-modal-close-btn").click();
+                    HandleResponse(response, "#modal-body-id");
+                    @* $("#modal-body-id").html(response); *@
+
+                            }
+            })
+            $("body").removeClass("loading");
+        }
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <partial name="_Toaster" />
+
+}

@@ -1,0 +1,299 @@
+@using DataAccessLayer.ViewModels;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Party Report";
+}
+
+<div class="col-3 col-xl-2 party-list bg-light p-0 border shadow">
+    <div class="border border-2 p-2">
+        Reports
+    </div>
+    <div class=" p-0">
+        <div class="p-2">PARTIES REPORTS</div>
+        <div
+            class="bg-white d-flex justify-content-start align-items-center p-2 border @(ViewData["report"] as string == "transaction" ? "shadow" : "")">
+            <div class="image @(ViewData["report"] as string == "transaction" ? "bg-color-light text-black " : "bg-light text-black-50")   rounded-circle d-flex justify-content-center align-items-center border p-1"
+                style="height: 3rem; width: 3rem;">
+                <i class="fa-solid fa-right-left fs-6 "></i>
+            </div>
+            <div class="ms-2 cursor-pointer">
+                <div class=" fs-6 fw-bold ">Transaction Report</div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<div class="col-9 col-xl-10 p-0" id="transactionReportPageId">
+
+
+</div>
+
+
+@section Scripts {
+    <script>
+        var partytype;
+
+        function SelectOption(tag, partyType) {
+            partytype = tag.getAttribute("data-party");
+            var allclasses = document.getElementsByClassName("allParty");
+            for (var i = 0; i < allclasses.length; i++) {
+                allclasses[i].classList.remove("party-selected");
+            }
+            tag.classList.add("party-selected");
+            $("#partySearch-report").val("");
+            $("#timeperiod-report").val("This year");
+            displayTransactionEntries(partytype, searchTextId, startDate, endDate)
+
+        }
+    </script>
+
+    <script>
+        var searchTextId = 0;
+        var searchTextTemp = "";
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth() + 1;
+        let currentMonthString = currentMonth.toString().padStart(2, '0');
+        let currentDay = currentDate.getDate()
+        let currentdayString = currentDay.toString().padStart(2, '0')
+        let daysInCurMonth = daysInMonth(currentMonth, currentYear);
+        let daysInCurMonthString = daysInCurMonth.toString().padStart(2, '0')
+        @* let partyType = ""; *@
+                                        var startDate = `${currentYear}-${currentMonthString}-01`;
+        var endDate = `${currentYear}-${currentMonthString}-${daysInCurMonth}`;
+
+
+        function displayTransactionReport() {
+            $.ajax({
+                url: "/Reports/TransactionReportsPartial",
+                type: "GET",
+                success: function (response) {
+                    $("#transactionReportPageId").html(response);
+                    setTimeout(function () {
+                        partytype = document.getElementsByClassName('party-selected')[0].getAttribute("data-party").toLocaleLowerCase();
+                        displayTransactionEntries(partytype, searchTextId, startDate, endDate)
+                        $("#timeperiod-report").val("This Month")
+                        $("#startDate-report").val(startDate);
+                        $("#endDate-report").val(endDate);
+
+                    }, 50)
+
+                }
+            })
+        }
+
+        function displayTransactionEntries(partyType, searchTextId, startDate, endDate) {
+            $.ajax({
+                url: "/Reports/DisplayTransactionEntries",
+                type: "GET",
+                data: { partyType, searchPartyId: searchTextId, startDate, endDate },
+                success: function (response) {
+                    $("#transaction-entries-report").html(response);
+                }
+            })
+        }
+
+        function daysInMonth(month, year) {
+            return new Date(year, month, 0).getDate();
+        }
+
+        //serach party and transaction by party
+        function searchByParty(partyId, partyName) {
+            console.log("hiii")
+            $("#partySearch-report").val(partyName);
+            searchTextId = partyId;
+            console.log(partyId)
+            displayTransactionEntries(partytype, searchTextId, startDate, endDate)
+
+        }
+
+        //generate pdf
+        function GeneratePdf() {
+            console.log(searchTextId)
+            $.ajax({
+                url: "/reports/GenerateReportPdf",
+                type: "GET",
+                data: { partytype, timePeriod: $("#timeperiod-report").val(), searchPartyId: searchTextId, startDate, endDate },
+                xhrFields: {
+                    responseType: 'blob' //binary large object -- to handle binary response
+                },
+                success: function (data, status, xhr) {
+                    let filename = "TransactionReport.pdf";
+
+                    let disposition = xhr.getResponseHeader('Content-Disposition');
+                    @* console.log("disp", disposition); *@
+                                                            if (disposition && disposition.indexOf('attachment') !== -1) {
+                        let matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition); //ExportOrderDataToExcel filename From disposition
+                        if (matches && matches[1]) {
+                            filename = matches[1].replace(/['"]/g, ''); // Remove quotes if present
+                        }
+                    }
+
+                    let blob = new Blob([data], { type: xhr.getResponseHeader('Content-Type') });
+                    let link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob); //timePeriod url points to blob obj
+                    link.download = filename; //Download file name
+                    document.body.appendChild(link); //appendChild so that it Cancelled be cliked
+                    link.click();
+                    document.body.removeChild(link);
+                    console.log("Export Successfully");
+                }
+
+            })
+        }
+
+        //generate excel sheet
+        function GenerateExcel() {
+            console.log(searchTextId)
+            $.ajax({
+                url: "/reports/GenerateExcel",
+                type: "GET",
+                data: { partytype, timePeriod: $("#timeperiod-report").val(), searchPartyId: searchTextId, startDate, endDate },
+                xhrFields: {
+                    responseType: 'blob' //binary large object -- to handle binary response
+                },
+                success: function (data, status, xhr) {
+                    let filename = "TransactionReport.pdf";
+
+                    let disposition = xhr.getResponseHeader('Content-Disposition');
+                    @* console.log("disp", disposition); *@
+                                                            if (disposition && disposition.indexOf('attachment') !== -1) {
+                        let matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition); //ExportOrderDataToExcel filename From disposition
+                        if (matches && matches[1]) {
+                            filename = matches[1].replace(/['"]/g, ''); // Remove quotes if present
+                        }
+                    }
+
+                    let blob = new Blob([data], { type: xhr.getResponseHeader('Content-Type') });
+                    let link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob); //timePeriod url points to blob obj
+                    link.download = filename; //Download file name
+                    document.body.appendChild(link); //appendChild so that it Cancelled be cliked
+                    link.click();
+                    document.body.removeChild(link);
+
+                    console.log("Export Successfully");
+                }
+
+            })
+        }
+
+
+        $(document).ready(function () {
+            displayTransactionReport();
+
+            $(document).on("change", "#timeperiod-report", function () {
+                let timePeriod = this.value;
+                endDate = new Date().toLocaleDateString('en-CA');
+
+                switch (timePeriod) {
+                    case "This year":
+                        startDate = `${currentYear}-01-01`;
+                        endDate = `${currentYear}-12-31`;
+                        break;
+                    case "This Month":
+                        startDate = `${currentYear}-${currentMonthString}-01`;
+                        endDate = `${currentYear}-${currentMonthString}-${daysInCurMonthString}`;
+                        break;
+                    case "This Quarter":
+                        let prevMonth = (currentMonth - 4).toString().padStart(2, '0');
+                        startDate = `${currentYear}-${prevMonth}-01`;
+                        endDate = `${currentYear}-${currentMonthString}-${daysInCurMonthString}`;
+                        break;
+                    case "Last Month":
+                        let prevMonth2 = (currentMonth - 1);
+                        let prevMonthstring2 = prevMonth2.toString().padStart(2, '0');
+                        let daysInPrevMonth = daysInMonth(prevMonth2, currentYear).toString().padStart(2, '0')
+                        startDate = `${currentYear}-${prevMonthstring2}-01`;
+                        endDate = `${currentYear}-${prevMonthstring2}-${daysInPrevMonth}`;
+                        break;
+                    case "Yesterday":
+                        startDate = `${currentYear}-${currentMonthString}-${(currentDay - 1).toString().padStart(2, '0')}`;
+                        endDate = `${currentYear}-${currentMonthString}-${currentdayString}`;
+                        break;
+                    case "Today":
+                        startDate = `${currentYear}-${currentMonthString}-${currentdayString}`;
+                        endDate = `${currentYear}-${currentMonthString}-${currentdayString}`;
+                        break;
+                    default:
+                        startDate = startDate;
+                        endDate = endDate;
+                        break;
+                }
+
+                $("#startDate-report").val(startDate);
+                $("#endDate-report").val(endDate);
+                displayTransactionEntries(partytype, searchTextId, startDate, endDate)
+            })
+
+            $(document).on("change", "#startDate-report", function () {
+                startDate = this.value;
+                $("#timeperiod-report").val("Custom")
+                if (startDate != "" && endDate != "") {
+                    if (startDate > endDate) {
+                        Toaster("start date should be less than end date", "error");
+                        $("#endDate-report").val("");
+                        endDate = "";
+                    } else {
+                        displayTransactionEntries(partytype, searchTextId, startDate, endDate)
+                    }
+                }
+            })
+
+            $(document).on("change", "#endDate-report", function () {
+                endDate = this.value;
+                $("#timeperiod-report").val("Custom")
+                if (startDate != "" && endDate != "") {
+                    if (startDate > endDate) {
+                        Toaster("start date should be less than end date", "error");
+                        this.value = "";
+                        endDate = ""
+                    } else {
+                        displayTransactionEntries(partytype, searchTextId, startDate, endDate)
+                    }
+                }
+
+            })
+
+            $(document).on("input", "#partySearch-report", function () {
+                searchTextTemp = this.value;
+                document.getElementById("party-search-options").classList.remove("d-none");
+                if (searchTextTemp != "") {
+                    $.ajax({
+                        url: "/Reports/SearchPartyOptions",
+                        type: "GET",
+                        data: { partytype, searchText: searchTextTemp },
+                        success: function (response) {
+                            $("#party-search-options").html(response);
+                        }
+                    })
+                } else {
+                    document.getElementById("party-search-options").classList.add("d-none");
+                    searchByParty(0, "")
+                }
+
+            })
+            $(document).on("click", "#partySearch-report", function () {
+                searchTextTemp = "";
+                document.getElementById("party-search-options").classList.remove("d-none");
+                $.ajax({
+                    url: "/Reports/SearchPartyOptions",
+                    type: "GET",
+                    data: { partytype, searchText: searchTextTemp },
+                    success: function (response) {
+                        $("#party-search-options").html(response);
+                    }
+                })
+            })
+
+            $(document).on("blur", "#partySearch-report", function () {
+                setTimeout(function () {
+                    searchTextTemp = "";
+                    document.getElementById("party-search-options").classList.add("d-none");
+                }, 200)
+            })
+        })
+    </script>
+}
