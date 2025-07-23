@@ -1,6 +1,7 @@
 using BusinessAcessLayer.Interface;
 using DataAccessLayer.Models;
 using DataAccessLayer.ViewModels;
+using LedgerBook.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -70,7 +71,7 @@ public class ActivityLogController : BaseController
     public IActionResult GetAllParties(int businessId)
     {
         ApplicationUser user = GetCurrentUserIdentity();
-        List<Parties> parties = _partyService.GetAllPartiesByBusiness(businessId,user.Id);
+        List<Parties> parties = _partyService.GetAllPartiesByBusiness(businessId, user.Id);
         return PartialView("_PartiesDropDown", parties);
     }
     #endregion

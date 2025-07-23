@@ -65,6 +65,7 @@ public class BaseController : Controller
     #region render to login page if not authorized
     protected IActionResult RedirectToLoginIfNotAuthenticated()
     {
+        var token = Request.Cookies[TokenKey.UserToken];
         if (Request.Cookies[TokenKey.UserToken] == null)
         {
             return RedirectToAction("Login", "Login");

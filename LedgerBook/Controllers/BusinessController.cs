@@ -56,7 +56,10 @@ public class BusinessController : BaseController
             return redirectResult;
         }
         ApplicationUser user = GetCurrentUserIdentity();
-        string username = user.FirstName + " " + user.LastName;
+        if (user != null)
+        {
+            string username = user.FirstName + " " + user.LastName;
+        }
         return View();
     }
     #endregion
@@ -81,7 +84,7 @@ public class BusinessController : BaseController
         businessMainVM.BusinessDetailViewModel.BusinessCategories = _referenceDataEntityService.GetReferenceValues(EnumHelper.EntityType.BusinessCategory.ToString());
         businessMainVM.BusinessDetailViewModel.BusinessTypes = _referenceDataEntityService.GetReferenceValues(EnumHelper.EntityType.BusinessType.ToString());
         businessMainVM.BusinessDetailViewModel.Roles = _roleService.GetAllRoles();
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         if (businessId == null)
         {
             businessMainVM.BusinessDetailViewModel.BusinessItem = new();
@@ -131,7 +134,7 @@ public class BusinessController : BaseController
     public async Task<IActionResult> RenderCreateUserModal(int? userId, int? businessId)
     {
         BusinessMainViewModel businessMainVM = new();
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         if (userId != null)
         {
             businessMainVM.UserPermissionViewModel.Users = await _userBusinessMappingService.GetUsersByBusiness((int)businessId, user.Id);
@@ -169,7 +172,7 @@ public class BusinessController : BaseController
             {
                 businessMainVM.UserPermissionViewModel.Users = new();
             }
-            User user = GetCurrentUser();
+            ApplicationUser user = GetCurrentUserIdentity();
 
             int createdUserId;
             int createdPersonaldetailId;
@@ -225,7 +228,7 @@ public class BusinessController : BaseController
                     return Json(false);
                 }
 
-                User userPresent = _userService.GetUserByEmailForUser(businessFormDetails.UserPermissionViewModel.UserDetail.Email);
+                ApplicationUser userPresent = _userService.GetuserByEmail(businessFormDetails.UserPermissionViewModel.UserDetail.Email);
 
                 if (userPresent == null)
                 {
@@ -272,8 +275,8 @@ public class BusinessController : BaseController
                         CommonMethods.CreateRoleEmail(businessFormDetails.UserPermissionViewModel.UserDetail.Email, businessFormDetails.UserPermissionViewModel.UserDetail.RoleName, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessName, loginLink);
                     });
                 }
-                string message = string.Format(Messages.AddUserInBusinessActivity, businessFormDetails.UserPermissionViewModel.UserDetail.FirstName + " " + businessFormDetails.UserPermissionViewModel.UserDetail.LastName,  user.FirstName + " " + user.LastName);
-                await SetActivityLog(message, EnumHelper.Actiontype.Add, EnumHelper.ActivityEntityType.Business, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id, EnumHelper.ActivityEntityType.Role, businessFormDetails.UserPermissionViewModel.UserDetail.UserId);
+                string message = string.Format(Messages.AddUserInBusinessActivity, businessFormDetails.UserPermissionViewModel.UserDetail.FirstName + " " + businessFormDetails.UserPermissionViewModel.UserDetail.LastName, user.FirstName + " " + user.LastName);
+                await SetActivityLog(message, EnumHelper.Actiontype.Add, EnumHelper.ActivityEntityType.Business, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id, EnumHelper.ActivityEntityType.Role, createdUserId);
                 businessFormDetails.UserPermissionViewModel.UserDetail.UserId = createdUserId;
             }
 
@@ -296,7 +299,7 @@ public class BusinessController : BaseController
     {
         BusinessMainViewModel businessMainVM = JsonConvert.DeserializeObject<BusinessMainViewModel>(businessVM);
 
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         UserViewmodel user1 = _userService.GetuserById(userId, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId);
         bool isDeletedMapping = await _userBusinessMappingService.DeleteUserBusinessMappingByBusinessId(userId, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id);
         UserViewmodel deletedUser = businessMainVM.UserPermissionViewModel.Users.FirstOrDefault(x => x.UserId == userId);
@@ -308,7 +311,7 @@ public class BusinessController : BaseController
                       CommonMethods.DeleteUserEmail(user1.Email, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessName, loginLink);
                   });
         // string message = string.Format(Messages.userToBusiness, businessFormDetails.UserPermissionViewModel.UserDetail.FirstName + " " + businessFormDetails.UserPermissionViewModel.UserDetail.LastName, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessName, businessFormDetails.UserPermissionViewModel.UserDetail.RoleName);
-        string message = string.Format(Messages.UserInBusinessActivity, deletedUser.FirstName + " "+ deletedUser.LastName , "deleted", user.FirstName + " " + user.LastName);
+        string message = string.Format(Messages.UserInBusinessActivity, deletedUser.FirstName + " " + deletedUser.LastName, "deleted", user.FirstName + " " + user.LastName);
         // string message = string.Format(Messages.DeleteuserFromBusiness, user1.FirstName + " " + user1.LastName, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessName);
 
         await SetActivityLog(message, EnumHelper.Actiontype.Delete, EnumHelper.ActivityEntityType.Business, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id, EnumHelper.ActivityEntityType.Role, user1.UserId);
@@ -366,7 +369,7 @@ public class BusinessController : BaseController
                 businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessLogoAttachment = attachment;
             }
         }
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
 
         int businessId = await _businessService.SaveBusiness(businessMainVM.BusinessDetailViewModel.BusinessItem, user.Id);
         if (businessId == 0)
@@ -396,7 +399,7 @@ public class BusinessController : BaseController
     public async Task<IActionResult> GetUsersByBusiness(string businessVM)
     {
         BusinessMainViewModel businessMainVM = JsonConvert.DeserializeObject<BusinessMainViewModel>(businessVM);
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         if (businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId != 0)
         {
             businessMainVM.UserPermissionViewModel.Users = await _userBusinessMappingService.GetUsersByBusiness(businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id);
@@ -412,7 +415,7 @@ public class BusinessController : BaseController
     #region check if user is same as loginuser
     public IActionResult IsUserSameAsLoginUser(BusinessMainViewModel businessMainVM)
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         if (user.Email.ToLower().Trim() == businessMainVM.UserPermissionViewModel.UserDetail.Email.ToLower().Trim())
         {
             return Json(true);
@@ -425,7 +428,7 @@ public class BusinessController : BaseController
     public IActionResult IsUserMainOwner(BusinessMainViewModel businessMainVM)
     {
         BusinessMainViewModel businessMainVMdeserialized = JsonConvert.DeserializeObject<BusinessMainViewModel>(businessMainVM.BusinessViewModelString);
-        User user = _userService.GetUserByEmailForUser(businessMainVM.UserPermissionViewModel.UserDetail.Email);
+        ApplicationUser user = _userService.GetuserByEmail(businessMainVM.UserPermissionViewModel.UserDetail.Email);
         if (user != null)
         {
             bool isMainOwner = _userBusinessMappingService.IsMainOwner(businessMainVMdeserialized.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id);
@@ -442,7 +445,7 @@ public class BusinessController : BaseController
     #region delete business
     public async Task<IActionResult> DeleteBusiness(int businessId)
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         bool isBusinessdeleted = await _businessService.DeleteBusiness(businessId, user.Id);
         if (isBusinessdeleted)
         {
@@ -458,7 +461,7 @@ public class BusinessController : BaseController
     #region  SetBusinessCookie
     public IActionResult SetBusinessCookie(int businessId)
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         string businessToken = _jwttokenService.GenerateBusinessToken(businessId);
         _cookieService.SetCookie(Response, TokenKey.BusinessToken, businessToken);
         _cookieService.SetCookie(Response, TokenKey.BusinessId, businessId.ToString());
@@ -479,7 +482,7 @@ public class BusinessController : BaseController
     #region setBusinessToken
     public IActionResult SetBusinessToken(int businessId)
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         string businessToken = _jwttokenService.GenerateBusinessToken(businessId);
         _cookieService.SetCookie(Response, TokenKey.BusinessToken, businessToken);
         _cookieService.SetCookie(Response, TokenKey.BusinessId, businessId.ToString());
@@ -493,7 +496,7 @@ public class BusinessController : BaseController
         ViewResponseModel partialViewResponseModel = new();
 
         BusinessMainViewModel businessMainVM = JsonConvert.DeserializeObject<BusinessMainViewModel>(businessVM);
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         bool isUserUpdated = await _userBusinessMappingService.ActiveInactiveUser(userId, businessId, isActive, user.Id);
         businessMainVM.UserPermissionViewModel.Users = await _userBusinessMappingService.GetUsersByBusiness(businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id);
         businessMainVM.UserPermissionViewModel.Users = _userBusinessMappingService.SetPermissions(businessMainVM.UserPermissionViewModel.Users, user.Id, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId);

@@ -211,12 +211,11 @@ public class BusinessService : IBusinessService
                 businessId = business.Id;
                 int roleId = _genericRepository.Get<Role>(r => r.RoleName == ConstantVariables.OwnerRole && !r.DeletedAt.HasValue)!.Id;
 
-                var userasda = _genericRepository.GetAll<User>(x => x.Id == userId && x.DeletedAt == null);
-                UserViewmodel user = _genericRepository.GetAll<User>(x => x.Id == userId && x.DeletedAt == null).Select(x => new UserViewmodel
+                UserViewmodel user = _genericRepository.GetAll<ApplicationUser>(x => x.Id == userId && x.DeletedAt == null).Select(x => new UserViewmodel
                 {
                     FirstName = x.FirstName,
                     LastName = x.LastName,
-                    MobileNumber = x.MobileNumber == null ? 0 : (long)x.MobileNumber,
+                    MobileNumber = x.PhoneNumber == null ? 0 : long.Parse(x.PhoneNumber),
 
 
                 }).FirstOrDefault();

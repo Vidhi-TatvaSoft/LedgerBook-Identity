@@ -47,7 +47,7 @@ public class PartyController : BaseController
         {
             return redirectResult;
         }
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         Businesses business = GetBusinessFromToken();
         if (business == null)
         {
@@ -81,7 +81,7 @@ public class PartyController : BaseController
         {
             return redirectResult;
         }
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         Businesses business = GetBusinessFromToken();
 
         if (business == null)
@@ -160,7 +160,7 @@ public class PartyController : BaseController
     #region save party post method
     public async Task<IActionResult> SaveParty(PartyTransactionViewModel partyTransactionVM)
     {
-        int userId = GetCurrentUser().Id;
+        int userId = GetCurrentUserIdentity().Id;
         Businesses business = GetBusinessFromToken();
         ViewResponseModel partialViewResponseModel = new();
         //check if email changes or not
@@ -330,7 +330,7 @@ public class PartyController : BaseController
         }
         else
         {
-            User user = GetCurrentUser();
+            ApplicationUser user = GetCurrentUserIdentity();
             Businesses business = GetBusinessFromToken();
             transactionEntryVM.BusinessName = business.BusinessName;
             transactionEntryVM.TransactionType = (byte)transactionEntryVM.TransactionTypeEnum;
@@ -369,7 +369,7 @@ public class PartyController : BaseController
     #region delete transaction
     public IActionResult DeleteTransaction(int transactionId)
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         int partyId = _partyService.DeleteTransaction(transactionId, user.Id);
         if (partyId != 0)
         {
@@ -427,7 +427,7 @@ public class PartyController : BaseController
     #region settle up party balance
     public async Task<IActionResult> SettleUpParty(decimal netBalance, int partyId)
     {
-        User user = GetCurrentUser();
+        ApplicationUser user = GetCurrentUserIdentity();
         Businesses business = GetBusinessFromToken();
         TransactionEntryViewModel transactionEntryVM = new();
         transactionEntryVM.PartyId = partyId;

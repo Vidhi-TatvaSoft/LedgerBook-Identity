@@ -37,7 +37,7 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
         {
             throw new Exception("User is not authenticated. Please log in.");
         }
-        User user = _loginService.GetUserFromToken(cookieSavedToken);
+        ApplicationUser user = _loginService.GetUserFromTokenIdentity(cookieSavedToken);
 
         var businessToken =  httpContext.Request.Cookies[TokenKey.BusinessToken];
         if (string.IsNullOrEmpty(businessToken))

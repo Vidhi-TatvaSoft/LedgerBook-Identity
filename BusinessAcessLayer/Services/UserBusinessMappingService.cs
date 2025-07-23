@@ -196,7 +196,7 @@ public class UserBusinessMappingService : IUserBusinessMappingService
     public List<RoleViewModel> GetRolesByBusinessId(int businessId, int userId)
     {
         return _genericRepository.GetAll<UserBusinessMappings>(
-            predicate : ubm => ubm.BusinessId == businessId && ubm.UserId == userId && ubm.DeletedAt == null,
+            predicate : ubm => ubm.BusinessId == businessId && ubm.UserId == userId && ubm.DeletedAt == null && ubm.IsActive,
             includes : new List<Expression<Func<UserBusinessMappings, object>>>
             {
                 x => x.Role

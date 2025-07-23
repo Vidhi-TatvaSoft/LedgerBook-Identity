@@ -53,7 +53,7 @@ public class LoginController : BaseController
                 {
                     throw new Exception("User is not authenticated. Please log in.");
                 }
-                User user = _loginService.GetUserFromToken(token);
+                ApplicationUser user = _loginService.GetUserFromTokenIdentity(token);
                 if (user == null)
                 {
                     return View();
