@@ -7,7 +7,7 @@ namespace DataAccessLayer.Models;
 
 public class LedgerBookDbContext : IdentityDbContext<ApplicationUser,ApplicationRole,int>
 {
-    public DbSet<User> Users { get; set; }
+    // public DbSet<User> Users { get; set; }
     public DbSet<Attachment> Attachments { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Permissions> Permissions { get; set; }
