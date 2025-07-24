@@ -50,7 +50,7 @@ public class ExceptionMiddleware
         message = Messages.ExceptionMessage;
 
         // _logger.LogError(exception, Messages.UnhandledExceptionMessage);
-        
+
         bool isAjax = context.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
         //add exception in db
@@ -79,7 +79,7 @@ public class ExceptionMiddleware
         {
             if (!context.Response.HasStarted)
             {
-                var redirectUrl = $"/ErrorPage/InternalServerError";
+                var redirectUrl = $"/ErrorPage/HandleError/{(int)code}";
                 context.Response.StatusCode = (int)HttpStatusCode.Redirect;
                 context.Response.Headers["Location"] = redirectUrl;
                 await context.Response.CompleteAsync();

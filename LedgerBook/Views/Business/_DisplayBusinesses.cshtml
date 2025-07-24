@@ -5,7 +5,7 @@
 {
     <div class="d-flex flex-column justify-content-center align-items-center fs-1 text-secondary mt-4 "
        >
-        <img src="~/images/book-icon.png" class="cursor-pointer" height="200px"  title="Add business" data-bs-toggle="modal" data-bs-target="#add-business-modal" onclick="addBusinessModal()">No Businesses
+        <img src="~/images/book-icon.png" class="cursor-pointer" height="200px"  title="Add business" onclick="addBusinessModal()">No Businesses
     </div>
 }
 else
@@ -33,7 +33,7 @@ else
                             @if (Business.CanEditDelete)
                             {
                                 <button class="btn btn-outline-primary" onclick="updateBusiness(@Business.BusinessId)"
-                                    title="Update business" data-bs-toggle="modal" data-bs-target="#add-business-modal"
+                                    title="Update business" 
                                     data-BusinessId=@Business.BusinessId><i class="fa-solid fa-pen"></i></button>
                                 @if (Business.CanDelete)
                                 {

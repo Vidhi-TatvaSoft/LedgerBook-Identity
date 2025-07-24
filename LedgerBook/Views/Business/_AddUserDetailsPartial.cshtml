@@ -28,7 +28,7 @@
                 <div class="d-flex justify-content-between uer-detail-div">
                     <div class="fs-3 fw-bold text-color mt-2">User Details</div>
                     <span class="text-color fs-2 fw-bold btn" data-toggle="tooltip" data-placement="top"
-                        title="Add User" data-bs-toggle="modal" data-bs-target="#add-user-modal" id="add-user-icon">
+                        title="Add User" id="add-user-icon">
                         <i class="bi bi-plus-square fw-bold"></i>
                     </span>
                 </div>
@@ -65,7 +65,7 @@
                                             {
                                                 <i class="fa-solid @(user.IsActive ? "fa-circle-check text-green" : "fa-circle-xmark text-danger") me-3 fs-5 cursor-pointer" data-bs-toggle="modal" data-bs-target="#inactive-user-modal" onclick="toggleActive(@user.UserId)" id="active-user-@user.UserId" title="@(user.IsActive ? "Inactivate user" : "Activate user")" ></i>
                                                 <i class="fa-solid fa-pen text-black me-3 mt-2 cursor-pointer" id="update-user-icon"
-                                                    data-bs-toggle="modal" data-bs-target="#add-user-modal" title="Update user"
+                                                    title="Update user"
                                                     onclick="updateUser(@user.UserId)" data-userId="@user.UserId"></i>
                                                 <i class="fa-solid fa-trash-can text-danger cursor-pointer" data-bs-toggle="modal"
                                                     title="Delete user" data-bs-target="#delete-user-modal"

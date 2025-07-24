@@ -32,13 +32,14 @@ public class BaseController : Controller
         string token = Request.Cookies[TokenKey.UserToken];
         if (string.IsNullOrEmpty(token))
         {
-            throw new Exception("User is not authenticated. Please log in.");
+            return null;
+            // throw new Exception("User is not authenticated. Please log in.");
         }
         User user = _loginService.GetUserFromToken(token);
         if (user == null)
         {
             return null;
-            throw new Exception("Invalid token or user not found.");
+            // throw new Exception("Invalid token or user not found.");
         }
         return user;
     }
@@ -50,13 +51,14 @@ public class BaseController : Controller
         string token = Request.Cookies[TokenKey.UserToken];
         if (string.IsNullOrEmpty(token))
         {
-            throw new Exception("User is not authenticated. Please log in.");
+            return null;
+            // throw new Exception("User is not authenticated. Please log in.");
         }
         ApplicationUser user = _loginService.GetUserFromTokenIdentity(token);
         if (user == null)
         {
             return null;
-            throw new Exception("Invalid token or user not found.");
+            // throw new Exception("Invalid token or user not found.");
         }
         return user;
     }
@@ -69,6 +71,18 @@ public class BaseController : Controller
         if (Request.Cookies[TokenKey.UserToken] == null)
         {
             return RedirectToAction("Login", "Login");
+        }
+        return null;
+    }
+    #endregion
+
+     #region render to login page if not authorized
+    protected IActionResult RedirectToIndexIfBusinessNotFound()
+    {
+        var token = Request.Cookies[TokenKey.BusinessToken];
+        if (Request.Cookies[TokenKey.BusinessToken] == null)
+        {
+            return RedirectToAction("Index", "Business");
         }
         return null;
     }

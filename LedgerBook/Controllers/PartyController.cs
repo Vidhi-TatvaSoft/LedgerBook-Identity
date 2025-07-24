@@ -40,14 +40,17 @@ public class PartyController : BaseController
     }
 
     #region magnage business index page
+    [PermissionAuthorize("AnyRole")]
     public IActionResult ManageBusiness()
     {
-        IActionResult redirectResult = RedirectToLoginIfNotAuthenticated();
-        if (redirectResult != null)
-        {
-            return redirectResult;
-        }
+        // IActionResult redirectResult = RedirectToIndexIfBusinessNotFound();
+        // if (redirectResult != null)
+        // {
+        //     return redirectResult;
+        // }
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         Businesses business = GetBusinessFromToken();
         if (business == null)
         {
@@ -74,14 +77,17 @@ public class PartyController : BaseController
     #endregion
 
     #region check roles and permission
+    [PermissionAuthorize("AnyRole")]
     public IActionResult CheckRolePermission()
     {
-        IActionResult redirectResult = RedirectToLoginIfNotAuthenticated();
-        if (redirectResult != null)
-        {
-            return redirectResult;
-        }
+        // IActionResult redirectResult = RedirectToIndexIfBusinessNotFound();
+        // if (redirectResult != null)
+        // {
+        //     return redirectResult;
+        // }
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         Businesses business = GetBusinessFromToken();
 
         if (business == null)
@@ -131,6 +137,8 @@ public class PartyController : BaseController
     public IActionResult GetAllParties(string partyType, string searchText = "", string filter = "-1", string sort = "-1")
     {
         Businesses business = GetBusinessFromToken();
+        if (business == null)
+            return RedirectToAction("Index", "Buisness");
         List<PartyViewModel> Parties = _partyService.GetPartiesByType(partyType, business.Id, searchText, filter, sort);
         return PartialView("_DisplayPartiesPartial", Parties);
     }
@@ -160,9 +168,20 @@ public class PartyController : BaseController
     #region save party post method
     public async Task<IActionResult> SaveParty(PartyTransactionViewModel partyTransactionVM)
     {
-        int userId = GetCurrentUserIdentity().Id;
-        Businesses business = GetBusinessFromToken();
         ViewResponseModel partialViewResponseModel = new();
+        ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+        {
+            partialViewResponseModel.RedirectUrl = Url.Action("Login", "Login");
+            return Json(partialViewResponseModel);
+        }
+        int userId = user.Id;
+        Businesses business = GetBusinessFromToken();
+        if (business == null)
+        {
+            partialViewResponseModel.RedirectUrl = Url.Action("Index", "Business");
+            return Json(partialViewResponseModel);
+        }
         //check if email changes or not
         if (partyTransactionVM.PartyViewModel.PartyId != 0)
         {
@@ -331,7 +350,17 @@ public class PartyController : BaseController
         else
         {
             ApplicationUser user = GetCurrentUserIdentity();
+            if (user == null)
+            {
+                partialViewResponseModel.RedirectUrl = Url.Action("Login", "Login");
+                return Json(partialViewResponseModel);
+            }
             Businesses business = GetBusinessFromToken();
+            if (business == null)
+            {
+                partialViewResponseModel.RedirectUrl = Url.Action("Index", "Business");
+                return Json(partialViewResponseModel);
+            }
             transactionEntryVM.BusinessName = business.BusinessName;
             transactionEntryVM.TransactionType = (byte)transactionEntryVM.TransactionTypeEnum;
             int transactionId = await _partyService.SaveTransactionEntry(transactionEntryVM, user.Id);
@@ -370,6 +399,8 @@ public class PartyController : BaseController
     public IActionResult DeleteTransaction(int transactionId)
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         int partyId = _partyService.DeleteTransaction(transactionId, user.Id);
         if (partyId != 0)
         {
@@ -389,6 +420,10 @@ public class PartyController : BaseController
         ViewResponseModel viewResponseModel = new();
         string partyType = _cookieService.GetCookie(Request, TokenKey.PartyType);
         Businesses business = GetBusinessFromToken();
+        if (business == null)
+        {
+            return RedirectToAction("Index", "Business");
+        }
         List<PartyViewModel> parties = _partyService.GetPartiesByType(partyType, business.Id, "", "-1", "-1");
 
         TotalAmountViewModel totalAmountViewModel = new();
@@ -428,7 +463,11 @@ public class PartyController : BaseController
     public async Task<IActionResult> SettleUpParty(decimal netBalance, int partyId)
     {
         ApplicationUser user = GetCurrentUserIdentity();
+         if (user == null)
+            return RedirectToAction("Index", "Business");
         Businesses business = GetBusinessFromToken();
+         if (business == null)
+            return RedirectToAction("Index", "Business");
         TransactionEntryViewModel transactionEntryVM = new();
         transactionEntryVM.PartyId = partyId;
         transactionEntryVM.TransactionAmount = Math.Abs(netBalance);
@@ -455,7 +494,7 @@ public class PartyController : BaseController
         string token = Request.Cookies[TokenKey.BusinessToken];
         if (string.IsNullOrEmpty(token))
         {
-            throw new Exception("Invalid token or business not found");
+            return null;
         }
         Businesses business = _businessService.GetBusinessFromToken(token);
         return business;

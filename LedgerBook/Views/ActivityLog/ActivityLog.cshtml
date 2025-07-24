@@ -119,6 +119,7 @@
                         type: "GET",
                         data: { activityData: JSON.stringify(activityData) },
                         success: function (response) {
+                            IsHtmlDoc(response);
                             $("#activities-display-div").html(response);
                             $("body").removeClass("loading");
                             currentPage = activityData.pageNumber;
@@ -141,6 +142,7 @@
                     url: "/ActivityLog/GetAllBusiness",
                     type: "GET",
                     success: function (response) {
+                        IsHtmlDoc(response);
                         $("#business-select").html(response);
                     }
                 });
@@ -212,6 +214,7 @@
                             type: "GET",
                             data: { businessId: activityData.businessId },
                             success: function (response) {
+                                IsHtmlDoc(response);
                                 $("#party-entity-select").html(response);
                             }
                         })

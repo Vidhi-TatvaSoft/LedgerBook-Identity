@@ -38,6 +38,8 @@ public class UserController : BaseController
     public IActionResult Profile()
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Login", "Login");
         UserProfileViewModel userProfileViewModel = _userService.GetUserProfile(user.Id);
         return View(userProfileViewModel);
     }
@@ -48,6 +50,8 @@ public class UserController : BaseController
     public async Task<IActionResult> Profile(UserProfileViewModel userProfileViewModel)
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Login", "Login");
         if (userProfileViewModel.AttachmentViewModel != null)
         {
             if (userProfileViewModel.AttachmentViewModel.BusinessLogo != null)
@@ -76,6 +80,8 @@ public class UserController : BaseController
         }
         bool isUserUpdated = await _userService.UpdateUserProfile(userProfileViewModel);
         ApplicationUser updatedUser = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Login", "Login");
         if (isUserUpdated)
         {
             if (updatedUser.ProfileAttachmentId != null)
@@ -109,6 +115,8 @@ public class UserController : BaseController
     {
         ViewResponseModel viewResponseModel = new();
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Login", "Login");
         ChangePasswordViewModel changePasswordViewModel = new();
         changePasswordViewModel.Email = user.Email;
         return PartialView("_ChangePasswordModalpartial", changePasswordViewModel);
@@ -119,10 +127,12 @@ public class UserController : BaseController
     public async Task<IActionResult> ChangePassword(ChangePasswordViewModel changePasswordViewModel)
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Login", "Login");
 
         if (user != null)
         {
-            if (!await _loginService.IsCorrectOldpassword(user.Email,changePasswordViewModel.OldPassword))
+            if (!await _loginService.IsCorrectOldpassword(user.Email, changePasswordViewModel.OldPassword))
             {
                 return Json(new { success = false, message = Messages.IncorrectOldPAssword });
             }

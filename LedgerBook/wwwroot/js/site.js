@@ -66,11 +66,35 @@ function HandleResponse(response, replacePartialViewId) {
     }
 }
 
+
+function AjaxComplete(event, xhr, settings) {
+    if (xhr.getResponseHeader("X-Error") == "true") {
+        console.log("ajaxxxx")
+        const response = xhr.responseJSON;
+        if (response && response.error) {
+            console.log(response)
+
+            $('.modal').modal('hide');
+            $('.btn-close').click();
+            $('.modal-backdrop').remove();
+            $(document.body).removeClass("modal-open");
+            $(document.body).removeAttr("style")
+
+            Toaster(response.error, "error");
+        } else {
+            $('.modal').modal('hide');
+            $('.btn-close').click();
+            Toater('An unexpected error occurred.', "error");
+        }
+    }
+}
+
 function changePasswordModal() {
     $.ajax({
         url: "/User/RenderChangePassword",
         type: "GET",
         success: function (response) {
+            IsHtmlDoc(response);
             $("#changepassword-body-id").html(response)
             // HandleResponse(response,"#changepassword-body-id")
         }
@@ -90,6 +114,7 @@ $(document).on("submit", "#change-password-form", function (e) {
             processData: false,
             data: formData,
             success: function (response) {
+                IsHtmlDoc(response.toString());
                 if (response.success) {
                     Toaster(response.message);
                     $('.btn-close').click();

@@ -104,7 +104,7 @@ builder.Services.AddAuthentication(x =>
         {
             if (!context.Response.HasStarted)
             {
-                // Redirect to login when access is forbidden (403)
+                // Redirect to unauthorize when access is forbidden (403)
                 context.Response.Redirect("/ErrorPage/Unauthorize");
             }
             return Task.CompletedTask;
@@ -118,7 +118,7 @@ builder.Services.AddAuthorization(options =>
 {
     var permissions = new[]
     {
-        "User","Owner/Admin", "PurchaseManager", "SalesManager"
+        "User","Owner/Admin", "PurchaseManager", "SalesManager","AnyRole"
     };
 
     foreach (var permission in permissions)

@@ -31,27 +31,34 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
     {
         var httpContext = _httpContextAccessor.HttpContext;
-        var cookieSavedToken = httpContext.Request.Cookies[TokenKey.UserToken];
-        // var roles = httpContext.Request.Cookies["Roles"];
+        string cookieSavedToken = httpContext.Request.Cookies[TokenKey.UserToken];
+
         if (string.IsNullOrEmpty(cookieSavedToken))
         {
             throw new Exception("User is not authenticated. Please log in.");
         }
         ApplicationUser user = _loginService.GetUserFromTokenIdentity(cookieSavedToken);
 
-        var businessToken =  httpContext.Request.Cookies[TokenKey.BusinessToken];
-        if (string.IsNullOrEmpty(businessToken))
-        {
-            throw new Exception("Invalid token or business not found");
-        }
-        Businesses business = _businessService.GetBusinessFromToken(businessToken);
-        List<RoleViewModel> rolesByUser = _userBusinessMappingService.GetRolesByBusinessId(business.Id, user.Id);
-
         if (string.IsNullOrEmpty(cookieSavedToken))
         {
             httpContext.Response.Redirect("/Login/Login");
             return Task.CompletedTask;
         }
+
+        string businessToken = httpContext.Request.Cookies[TokenKey.BusinessToken];
+        if (string.IsNullOrEmpty(businessToken))
+        {
+            throw new Exception("Invalid token or business not found");
+        }
+
+        if (string.IsNullOrEmpty(businessToken))
+        {
+            httpContext.Response.Redirect("/Business/Index");
+            return Task.CompletedTask;
+        }
+        Businesses business = _businessService.GetBusinessFromToken(businessToken);
+        List<RoleViewModel> rolesByUser = _userBusinessMappingService.GetRolesByBusinessId(business.Id, user.Id);
+
         string email = _jWTService.GetClaimValue(cookieSavedToken, "email");
         if (string.IsNullOrEmpty(email))
         {
@@ -78,7 +85,12 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
                     context.Succeed(requirement);
                 }
                 break;
-
+             case "AnyRole":
+                if (rolesByUser.Any(role => role.RoleName == "Sales Manager" || role.RoleName == "Owner/Admin" || role.RoleName == "Purchase Manager"))
+                {
+                    context.Succeed(requirement);
+                }
+                break;
             default:
                 break;
         }

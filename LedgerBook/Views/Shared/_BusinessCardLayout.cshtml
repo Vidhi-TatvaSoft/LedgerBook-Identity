@@ -46,7 +46,8 @@
                                         style="border-radius: 50%; height: auto;">
 
                                 </div>
-                                <div class="logo-text text-white fs-3 mt-2 fw-bold d-none d-sm-block">Ledgerbook
+                                <div class="logo-text text-white fs-3 mt-2 fw-bold d-none d-sm-block"
+                                    id="ledgerbook-title">Ledgerbook
                                 </div>
                             </div>
                         </div>
@@ -151,6 +152,8 @@
     });
 
     function HandleResponse(response, replacePartialViewId) {
+        console.log(response)
+        debugger
         if (response) {
             if (response.redirectUrl) {
                 window.location.href = response.redirectUrl;
@@ -199,15 +202,21 @@
     }
 
     $(document).ready(function () {
-        // 1. Show toaster if TempData contains error (normal request)
 
         // 2. Global AJAX error catcher
         $(document).ajaxComplete(function (event, xhr, settings) {
             if (xhr.getResponseHeader("X-Error") == "true") {
+                console.log("ajaxxxx")
                 const response = xhr.responseJSON;
                 if (response && response.error) {
+                    console.log(response)
+
                     $('.modal').modal('hide');
                     $('.btn-close').click();
+                    $('.modal-backdrop').remove();
+                    $(document.body).removeClass("modal-open");
+                    $(document.body).removeAttr("style")
+
                     Toaster(response.error, "error");
                 } else {
                     $('.modal').modal('hide');

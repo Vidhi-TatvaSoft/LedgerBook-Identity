@@ -387,16 +387,7 @@
 
         // 2. Global AJAX error catcher
         $(document).ajaxComplete(function (event, xhr, settings) {
-            if (xhr.getResponseHeader("X-Error") == "true") {
-                const response = xhr.responseJSON;
-                if (response && response.error) {
-                    Toaster(response.error, "error");
-                    $('.btn-close').click();
-                } else {
-                    Toaster('An unexpected error occurred.', "error");
-                    $('.btn-close').click();
-                }
-            }
+            AjaxComplete(event,xhr,settings);
         });
 
     });

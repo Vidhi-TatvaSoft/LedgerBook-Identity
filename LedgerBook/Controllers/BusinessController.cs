@@ -68,6 +68,10 @@ public class BusinessController : BaseController
     public IActionResult GetBusinesses(string searchText = null)
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+        {
+            return RedirectToAction("Index", "Business");
+        }
         int userId = user.Id;
         List<BusinessViewModel> businessList = _businessService.GetBusinesses(userId, searchText);
         List<BusinessViewModel> businessListRolewise = _businessService.GetRolewiseBusiness(businessList);
@@ -85,6 +89,9 @@ public class BusinessController : BaseController
         businessMainVM.BusinessDetailViewModel.BusinessTypes = _referenceDataEntityService.GetReferenceValues(EnumHelper.EntityType.BusinessType.ToString());
         businessMainVM.BusinessDetailViewModel.Roles = _roleService.GetAllRoles();
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
+
         if (businessId == null)
         {
             businessMainVM.BusinessDetailViewModel.BusinessItem = new();
@@ -135,6 +142,8 @@ public class BusinessController : BaseController
     {
         BusinessMainViewModel businessMainVM = new();
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         if (userId != null)
         {
             businessMainVM.UserPermissionViewModel.Users = await _userBusinessMappingService.GetUsersByBusiness((int)businessId, user.Id);
@@ -173,6 +182,9 @@ public class BusinessController : BaseController
                 businessMainVM.UserPermissionViewModel.Users = new();
             }
             ApplicationUser user = GetCurrentUserIdentity();
+            if (user == null)
+                return RedirectToAction("Index", "Business");
+
 
             int createdUserId;
             int createdPersonaldetailId;
@@ -300,6 +312,8 @@ public class BusinessController : BaseController
         BusinessMainViewModel businessMainVM = JsonConvert.DeserializeObject<BusinessMainViewModel>(businessVM);
 
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         UserViewmodel user1 = _userService.GetuserById(userId, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId);
         bool isDeletedMapping = await _userBusinessMappingService.DeleteUserBusinessMappingByBusinessId(userId, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id);
         UserViewmodel deletedUser = businessMainVM.UserPermissionViewModel.Users.FirstOrDefault(x => x.UserId == userId);
@@ -370,6 +384,8 @@ public class BusinessController : BaseController
             }
         }
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
 
         int businessId = await _businessService.SaveBusiness(businessMainVM.BusinessDetailViewModel.BusinessItem, user.Id);
         if (businessId == 0)
@@ -400,6 +416,8 @@ public class BusinessController : BaseController
     {
         BusinessMainViewModel businessMainVM = JsonConvert.DeserializeObject<BusinessMainViewModel>(businessVM);
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         if (businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId != 0)
         {
             businessMainVM.UserPermissionViewModel.Users = await _userBusinessMappingService.GetUsersByBusiness(businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id);
@@ -416,6 +434,8 @@ public class BusinessController : BaseController
     public IActionResult IsUserSameAsLoginUser(BusinessMainViewModel businessMainVM)
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         if (user.Email.ToLower().Trim() == businessMainVM.UserPermissionViewModel.UserDetail.Email.ToLower().Trim())
         {
             return Json(true);
@@ -446,6 +466,8 @@ public class BusinessController : BaseController
     public async Task<IActionResult> DeleteBusiness(int businessId)
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         bool isBusinessdeleted = await _businessService.DeleteBusiness(businessId, user.Id);
         if (isBusinessdeleted)
         {
@@ -462,6 +484,8 @@ public class BusinessController : BaseController
     public IActionResult SetBusinessCookie(int businessId)
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         string businessToken = _jwttokenService.GenerateBusinessToken(businessId);
         _cookieService.SetCookie(Response, TokenKey.BusinessToken, businessToken);
         _cookieService.SetCookie(Response, TokenKey.BusinessId, businessId.ToString());
@@ -483,6 +507,8 @@ public class BusinessController : BaseController
     public IActionResult SetBusinessToken(int businessId)
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         string businessToken = _jwttokenService.GenerateBusinessToken(businessId);
         _cookieService.SetCookie(Response, TokenKey.BusinessToken, businessToken);
         _cookieService.SetCookie(Response, TokenKey.BusinessId, businessId.ToString());
@@ -497,6 +523,13 @@ public class BusinessController : BaseController
 
         BusinessMainViewModel businessMainVM = JsonConvert.DeserializeObject<BusinessMainViewModel>(businessVM);
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+        {
+            partialViewResponseModel.RedirectUrl = Url.Action("Index", "Business");
+            return Json(partialViewResponseModel);
+        }
+
+        // return RedirectToAction("Index", "Business");
         bool isUserUpdated = await _userBusinessMappingService.ActiveInactiveUser(userId, businessId, isActive, user.Id);
         businessMainVM.UserPermissionViewModel.Users = await _userBusinessMappingService.GetUsersByBusiness(businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id);
         businessMainVM.UserPermissionViewModel.Users = _userBusinessMappingService.SetPermissions(businessMainVM.UserPermissionViewModel.Users, user.Id, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId);

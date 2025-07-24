@@ -53,6 +53,8 @@ public class ActivityLogController : BaseController
     {
         ActivityDataViewModel activityDataVM = JsonConvert.DeserializeObject<ActivityDataViewModel>(activityData);
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         PaginationViewModel<ActivityLogsViewModel> activities = _activityLogService.GetActivities(activityDataVM, user.Id);
         return PartialView("_DisplayActivities", activities);
     }
@@ -62,6 +64,8 @@ public class ActivityLogController : BaseController
     public IActionResult GetAllBusiness()
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         List<BusinessViewModel> businesses = _businessService.GetAllBusinesses(user.Id);
         return PartialView("_BusinessDropDown", businesses);
     }
@@ -71,6 +75,8 @@ public class ActivityLogController : BaseController
     public IActionResult GetAllParties(int businessId)
     {
         ApplicationUser user = GetCurrentUserIdentity();
+        if (user == null)
+            return RedirectToAction("Index", "Business");
         List<Parties> parties = _partyService.GetAllPartiesByBusiness(businessId, user.Id);
         return PartialView("_PartiesDropDown", parties);
     }

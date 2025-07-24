@@ -16,8 +16,7 @@
                     style="height:35px; width:100% !important;" placeholder="Search" oninput="RemoveWhiteSpace(this)" />
                 <span class="text-color fs-6 fw-bold btn text-nowrap btn-primary mt-3 cursor-pointer "
                     style="height:35px; width:100% !important;" data-toggle="tooltip" data-placement="top"
-                    title="Add business" data-bs-toggle="modal" data-bs-target="#add-business-modal"
-                    onclick="addBusinessModal()">Add Business</span>
+                    title="Add business" onclick="addBusinessModal()">Add Business</span>
             </span>
         </div>
 
@@ -28,7 +27,7 @@
 </div>
 
 <!-------------------------------------- Modal--------------------------------------------------->
-<div id="add-business-modal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+<div id="add-business-modal" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-xl" id="modal-body-id">
 
     </div>
@@ -67,13 +66,12 @@
         function displayBusinessCards(searchText = "") {
             if (searchText.trim())
                 $("body").addClass("loading");
-
             $.ajax({
                 url: "/Business/GetBusinesses",
                 type: "GET",
                 data: { searchText: searchText },
                 success: function (response) {
-                    IsHtmlDoc(response);
+                    IsHtmlDoc(response.toString());
                     $("#businss-cards").html(response);
                 }
             })
@@ -117,12 +115,14 @@
                 type: "GET",
                 success: function (response) {
                     IsHtmlDoc(response);
+                    $("#add-business-modal").modal('show');
                     $("#modal-body-id").html(response);
                     $("#MobileNumber-business").val("");
                 },
                 error: function (xhr, status, error) {
                     $("body").removeClass("loading");
                     $('.btn-close').click();
+                    $(".modal").show('hide');
                     displayBusinessCards();
                 }
             });
@@ -179,6 +179,7 @@
                 success: function (response) {
                     $("body").removeClass("loading");
                     IsHtmlDoc(response);
+                    $("#add-business-modal").modal("show");
                     $("#modal-body-id").html(response);
                     setTimeout(function () {
                         $("#browseFileText").text(
@@ -189,6 +190,8 @@
                     }, 50)
                 }
             });
+            $("body").removeClass("loading");
+
         }
 
 
@@ -224,19 +227,24 @@
                 type: "GET",
                 data: { userId, businessId: businessDetailsVM.businessDetailViewModel.businessItem.businessId },
                 success: function (response) {
-                    IsHtmlDoc(response);
-                    $("#craete-user-modal-content").html(response);
-                    $("#email-user").prop("disabled", true);
-                    let roles = $(".role-checkbox");
-                    let selectedRoles = []
-                    for (i = 0; i < businessDetailsVM.userPermissionViewModel.users; i++) {
-                        if (businessDetailsVM.userPermissionViewModel.users[i].userId == userId) {
-                            for (j = 0; j < businessDetailsVM.userPermissionViewModel.users[i].roles.length; j++) {
-                                selectedRoles.push(businessDetailsVM.userPermissionViewModel.users[i].roles[j].roleId);
-                                $(`role-${businessDetailsVM.userPermissionViewModel.users[i].roles[j].roleId}`).prop("checked", true);
+                    if (!response.toString().includes("</div>")) {
+                        Toaster(response.message, "error");
+                    } else {
+                        $("#add-user-modal").modal("show");
+                        IsHtmlDoc(response.toString());
+                        $("#craete-user-modal-content").html(response);
+                        $("#email-user").prop("disabled", true);
+                        let roles = $(".role-checkbox");
+                        let selectedRoles = []
+                        for (i = 0; i < businessDetailsVM.userPermissionViewModel.users; i++) {
+                            if (businessDetailsVM.userPermissionViewModel.users[i].userId == userId) {
+                                for (j = 0; j < businessDetailsVM.userPermissionViewModel.users[i].roles.length; j++) {
+                                    selectedRoles.push(businessDetailsVM.userPermissionViewModel.users[i].roles[j].roleId);
+                                    $(`role-${businessDetailsVM.userPermissionViewModel.users[i].roles[j].roleId}`).prop("checked", true);
+                                }
                             }
-                        }
 
+                        }
                     }
                 }
             });
@@ -336,59 +344,60 @@
                     formData.append('businessViewModelString', JSON.stringify(businessDetailsVM))
                     formData.append('mappingRoles', JSON.stringify(selectedRoles))
 
-                        $.ajax({
-                            url: "/Business/IsUserSameAsLoginUser",
-                            type: "POST",
-                            contentType: false,
-                            processData: false,
-                            data: formData,
-                            success: function (res) {
-                                if (res) {
-                                    Toaster(constant.UserExistWithRole, "error");
-                                    $(".usermodal-close-btn").click();
-                                    $("body").removeClass("loading");
-                                    return;
-                                } else {
-                                    $.ajax({
-                                        url: "/Business/IsUserMainOwner",
-                                        type: "POST",
-                                        contentType: false,
-                                        processData: false,
-                                        data: formData,
-                                        success: function (res) {
-                                            if (res) {
-                                                Toaster("You dont have permission to edit owner's role", "error");
-                                                $(".usermodal-close-btn").click();
-                                                $("body").removeClass("loading");
-                                                return;
-                                            } else {
-                                                $(".usermodal-close-btn").click();
-                                                $("body").removeClass("loading");
-                                                $.ajax({
-                                                    url: "/Business/CreateUser",
-                                                    type: "POST",
-                                                    contentType: false,
-                                                    processData: false,
-                                                    data: formData,
-                                                    success: function (response) {
-                                                        if (!response) {
-                                                            Toaster("Something went wrong. Please try again later.", "error")
+                    $.ajax({
+                        url: "/Business/IsUserSameAsLoginUser",
+                        type: "POST",
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        success: function (res) {
+                            if (res) {
+                                Toaster(constant.UserExistWithRole, "error");
+                                $(".usermodal-close-btn").click();
+                                $("body").removeClass("loading");
+                                return;
+                            } else {
+                                $.ajax({
+                                    url: "/Business/IsUserMainOwner",
+                                    type: "POST",
+                                    contentType: false,
+                                    processData: false,
+                                    data: formData,
+                                    success: function (res) {
+                                        if (res) {
+                                            Toaster("You dont have permission to edit owner's role", "error");
+                                            $(".usermodal-close-btn").click();
+                                            $("body").removeClass("loading");
+                                            return;
+                                        } else {
+                                            $(".usermodal-close-btn").click();
+                                            $("body").removeClass("loading");
+                                            $.ajax({
+                                                url: "/Business/CreateUser",
+                                                type: "POST",
+                                                contentType: false,
+                                                processData: false,
+                                                data: formData,
+                                                success: function (response) {
+                                                    if (!response) {
+                                                        Toaster("Something went wrong. Please try again later.", "error")
+                                                    } else {
+                                                        IsHtmlDoc(response)
+                                                        $("#modal-body-id").html(response);
+                                                        if (userId == 0) {
+                                                            Toaster("User added successfully")
                                                         } else {
-                                                            $("#modal-body-id").html(response);
-                                                            if (userId == 0) {
-                                                                Toaster("User added successfully")
-                                                            } else {
-                                                                Toaster("User updated successfully")
-                                                            }
+                                                            Toaster("User updated successfully")
                                                         }
                                                     }
-                                                })
-                                            }
+                                                }
+                                            })
                                         }
-                                    })
-                                }
+                                    }
+                                })
                             }
-                        })
+                        }
+                    })
 
                 }
             })
@@ -402,10 +411,10 @@
                     type: "GET",
                     data: { businessId: businessDetailsVM.businessDetailViewModel.businessItem.businessId },
                     success: function (response) {
-                        IsHtmlDoc(response);
+                        IsHtmlDoc(response.toString());
+                        $("#add-user-modal").modal("show");
                         $("#craete-user-modal-content").html(response);
                         $("#mobileNumber-user").val("");
-
                     }
                 });
             })
@@ -467,8 +476,8 @@
                         if (!response) {
                             Toaster(constant.GlobalExceptionMessage, "error")
                             $('.btn-clode').click();
-                        } else {
-                            IsHtmlDoc(response);
+                        } else if (response.toString().includes("</div>")) {
+                            IsHtmlDoc(response.toString());
                             $("#modal-body-id").html(response);
                             if (businessId == 0) {
                                 $("#user-details-confirmation-modal").modal('show');
@@ -482,6 +491,8 @@
                                             ? "Browse File" : businessDetailsVM.businessDetailViewModel.businessItem.businessLogoAttachment.fileName);
                                 }, 50)
                             }
+                        } else {
+
                         }
                     }
                 })
@@ -532,6 +543,7 @@
                 type: "GET",
                 data: { businessId },
                 success: function (response) {
+                    IsHtmlDoc(response)
                     if (response.success) {
                         Toaster(response.message);
                     } else {
@@ -567,11 +579,12 @@
                 type: "POST",
                 data: { userId, isActive, businessId: businessDetailsVM.businessDetailViewModel.businessItem.businessId, businessVM: JSON.stringify(businessDetailsVM) },
                 success: function (response) {
+                    console.log(response)
                     $(".user-inactive-modal-close-btn").click();
                     HandleResponse(response, "#modal-body-id");
                     @* $("#modal-body-id").html(response); *@
 
-                            }
+                                                                        }
             })
             $("body").removeClass("loading");
         }
