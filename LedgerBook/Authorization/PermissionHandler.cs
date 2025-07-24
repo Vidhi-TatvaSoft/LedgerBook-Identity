@@ -33,12 +33,11 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
         var httpContext = _httpContextAccessor.HttpContext;
         string cookieSavedToken = httpContext.Request.Cookies[TokenKey.UserToken];
 
+        ApplicationUser user = _loginService.GetUserFromTokenIdentity(cookieSavedToken);
         if (string.IsNullOrEmpty(cookieSavedToken))
         {
-            throw new Exception("User is not authenticated. Please log in.");
+            throw new Exception("User token not Found");
         }
-        ApplicationUser user = _loginService.GetUserFromTokenIdentity(cookieSavedToken);
-
         if (string.IsNullOrEmpty(cookieSavedToken))
         {
             httpContext.Response.Redirect("/Login/Login");
@@ -48,9 +47,8 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
         string businessToken = httpContext.Request.Cookies[TokenKey.BusinessToken];
         if (string.IsNullOrEmpty(businessToken))
         {
-            throw new Exception("Invalid token or business not found");
+            throw new Exception("Business token not Found");
         }
-
         if (string.IsNullOrEmpty(businessToken))
         {
             httpContext.Response.Redirect("/Business/Index");
@@ -85,7 +83,7 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
                     context.Succeed(requirement);
                 }
                 break;
-             case "AnyRole":
+            case "AnyRole":
                 if (rolesByUser.Any(role => role.RoleName == "Sales Manager" || role.RoleName == "Owner/Admin" || role.RoleName == "Purchase Manager"))
                 {
                     context.Succeed(requirement);

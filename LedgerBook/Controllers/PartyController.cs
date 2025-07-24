@@ -40,7 +40,6 @@ public class PartyController : BaseController
     }
 
     #region magnage business index page
-    [PermissionAuthorize("AnyRole")]
     public IActionResult ManageBusiness()
     {
         // IActionResult redirectResult = RedirectToIndexIfBusinessNotFound();
@@ -54,7 +53,7 @@ public class PartyController : BaseController
         Businesses business = GetBusinessFromToken();
         if (business == null)
         {
-            throw new Exception("Invalid token or business not found.");
+            return RedirectToAction("Index", "Business");
         }
         string partyType2 = _cookieService.GetCookie(Request, TokenKey.PartyType);
         if (partyType2 == PartyType.Customer || partyType2 == PartyType.Supplier)
@@ -77,7 +76,6 @@ public class PartyController : BaseController
     #endregion
 
     #region check roles and permission
-    [PermissionAuthorize("AnyRole")]
     public IActionResult CheckRolePermission()
     {
         // IActionResult redirectResult = RedirectToIndexIfBusinessNotFound();
@@ -92,7 +90,7 @@ public class PartyController : BaseController
 
         if (business == null)
         {
-            throw new Exception("Invalid token or business not found.");
+            return RedirectToAction("Index", "Business");
         }
         List<RoleViewModel> rolesByUser = _userBusinessMappingService.GetRolesByBusinessId(business.Id, user.Id);
         _cookieService.SetCookie(Response, TokenKey.BusinessName, business.BusinessName);

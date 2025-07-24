@@ -105,7 +105,7 @@ builder.Services.AddAuthentication(x =>
             if (!context.Response.HasStarted)
             {
                 // Redirect to unauthorize when access is forbidden (403)
-                context.Response.Redirect("/ErrorPage/Unauthorize");
+                context.Response.Redirect("/Login/Login");
             }
             return Task.CompletedTask;
         }

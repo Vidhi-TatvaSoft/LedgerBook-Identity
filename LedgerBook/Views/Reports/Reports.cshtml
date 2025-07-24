@@ -70,6 +70,7 @@
                 url: "/Reports/TransactionReportsPartial",
                 type: "GET",
                 success: function (response) {
+                    IsHtmlDoc(response);
                     $("#transactionReportPageId").html(response);
                     setTimeout(function () {
                         partytype = document.getElementsByClassName('party-selected')[0].getAttribute("data-party").toLocaleLowerCase();
@@ -90,6 +91,7 @@
                 type: "GET",
                 data: { partyType, searchPartyId: searchTextId, startDate, endDate },
                 success: function (response) {
+                    IsHtmlDoc(response);
                     $("#transaction-entries-report").html(response);
                 }
             })
@@ -266,6 +268,7 @@
                         type: "GET",
                         data: { partytype, searchText: searchTextTemp },
                         success: function (response) {
+                            IsHtmlDoc(response);
                             $("#party-search-options").html(response);
                         }
                     })
@@ -283,6 +286,7 @@
                     type: "GET",
                     data: { partytype, searchText: searchTextTemp },
                     success: function (response) {
+                        IsHtmlDoc(response);
                         $("#party-search-options").html(response);
                     }
                 })

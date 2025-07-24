@@ -47,6 +47,8 @@ public class ReportsController : BaseController
     public IActionResult TransactionReportsPartial()
     {
         Businesses business = GetBusinessFromToken();
+        if (business == null)
+            return RedirectToAction("Index", "Business");
         ReportCountsViewModel reportCountsVM = _transactionReportService.GetReportCounts(business.Id);
         return PartialView("_TransactionReportPagePartial", reportCountsVM);
     }
@@ -56,6 +58,8 @@ public class ReportsController : BaseController
     public IActionResult DisplayTransactionEntries(string partyType, int searchPartyId = 0, string startDate = "", string endDate = "")
     {
         Businesses business = GetBusinessFromToken();
+        if (business == null)
+            return RedirectToAction("Index", "Business");
         ReportTransactionEntriesViewModel transactionEntries = new();
         transactionEntries.TransactionsList = _transactionReportService.GetTransactionEntries(business.Id, partyType, searchPartyId, startDate, endDate);
 
@@ -70,6 +74,8 @@ public class ReportsController : BaseController
     public IActionResult SearchPartyOptions(string partytype, string searchText)
     {
         Businesses business = GetBusinessFromToken();
+        if (business == null)
+            return RedirectToAction("Index", "Business");
         List<PartyViewModel> parties = _partyService.GetPartiesByType(partytype, business.Id, searchText, "-1", "-1");
         return PartialView("_SearchPartyOptionsPartial", parties);
     }
@@ -79,7 +85,8 @@ public class ReportsController : BaseController
     public IActionResult GenerateReportPdf(string partytype, string timePeriod, int searchPartyId = 0, string startDate = "", string endDate = "")
     {
         Businesses business = GetBusinessFromToken();
-
+        if (business == null)
+            return RedirectToAction("Index", "Business");
         ReportTransactionEntriesViewModel reportpdf = _transactionReportService.GetReportdata(partytype, timePeriod, business.Id, searchPartyId, startDate, endDate);
         // return PartialView("_reportpdf", reportpdf);
 
@@ -97,6 +104,8 @@ public class ReportsController : BaseController
     {
 
         Businesses business = GetBusinessFromToken();
+         if (business == null)
+            return RedirectToAction("Index", "Business");
         ReportTransactionEntriesViewModel reportExcel = _transactionReportService.GetReportdata(partytype, timePeriod, business.Id, searchPartyId, startDate, endDate);
 
         var FileData = await _transactionReportService.ExportData(reportExcel);
@@ -113,7 +122,7 @@ public class ReportsController : BaseController
         string token = Request.Cookies[TokenKey.BusinessToken];
         if (string.IsNullOrEmpty(token))
         {
-            throw new Exception("Invalid token or business not found");
+            return null;
         }
         Businesses business = _businessService.GetBusinessFromToken(token);
         return business;

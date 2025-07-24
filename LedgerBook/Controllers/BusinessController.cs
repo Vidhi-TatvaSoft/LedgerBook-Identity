@@ -141,6 +141,7 @@ public class BusinessController : BaseController
     public async Task<IActionResult> RenderCreateUserModal(int? userId, int? businessId)
     {
         BusinessMainViewModel businessMainVM = new();
+
         ApplicationUser user = GetCurrentUserIdentity();
         if (user == null)
             return RedirectToAction("Index", "Business");
@@ -338,7 +339,6 @@ public class BusinessController : BaseController
     public async Task<IActionResult> SaveBusiness(BusinessMainViewModel businessMainVM)
     {
         BusinessMainViewModel businessVM = JsonConvert.DeserializeObject<BusinessMainViewModel>(businessMainVM.BusinessViewModelString);
-
         if (businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessLogoAttachment != null)
         {
             if (businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessLogoAttachment.BusinessLogo != null)
