@@ -32,7 +32,7 @@
             <tbody>
                 @if (Model.TransactionsList.Count != 0)
                 {
-                    @foreach (var entry in Model.TransactionsList)
+                    @foreach (TransactionEntryViewModel entry in Model.TransactionsList)
                     {
                         <tr>
                             <td class="text-start text-nowrap">@entry.CreateDate</td>

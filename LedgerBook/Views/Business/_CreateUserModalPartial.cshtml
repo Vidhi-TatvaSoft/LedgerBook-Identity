@@ -64,7 +64,7 @@
 
                 @if (Model.UserPermissionViewModel.UserDetail.UserId != 0)
                 {
-                    @foreach (var item in Model.BusinessDetailViewModel.Roles)
+                    @foreach (RoleViewModel item in Model.BusinessDetailViewModel.Roles)
                     {
 
                         bool isSelected = false;
@@ -85,7 +85,7 @@
                 }
                 else
                 {
-                    @foreach (var role in Model.BusinessDetailViewModel.Roles)
+                    @foreach (RoleViewModel role in Model.BusinessDetailViewModel.Roles)
                     {
                         <div class="form-check me-2">
                             <input class="form-check-input role-checkbox" type="checkbox" id="role-{@role.RoleId}"

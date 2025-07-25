@@ -126,3 +126,33 @@ $(document).on("submit", "#change-password-form", function (e) {
     }
 })
 
+function AjaxResponseHandle(response) {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(response, 'text/html');
+    var title = doc.title;
+    if (title === "Login - LedgerBook" || title === "Register - LedgerBook") {
+        window.location.href = '@Url.Action("Login", "Login")';
+    } else if (title === "Business - LedgerBook") {
+        window.location.href = '@Url.Action("Index", "Business")';
+    } else if (title === "View Business - LedgerBook" || "Party Report - LedgerBook") {
+        window.location.href = '@Url.Action("CheckRolePermission", "Party")';
+    } else if (title === "InternalServerError" || title === "Forbidden" || title === "Unauthorize" || title === "PageNotFoundError") {
+        var url = `/ErrorPage/${title}`;
+        window.location.href = url;
+    } else if (title === "InternalServerError - LedgerBook" || title === "Forbidden - LedgerBook" || title === "Unauthorize - LedgerBook" || title === "PageNotFoundError - LedgerBook") {
+        var url = `/ErrorPage/${title.split(" ")[0].toString().trim()}`;
+        window.location.href = url;
+    } else {
+        Toaster('Unexpected response format.', "error");
+    }
+}
+
+function IsHtmlDoc(response) {
+    if (response.statusCode) {
+        return;
+    }
+    if ((response.trim().indexOf('<!DOCTYPE html>') === 0) || (response.trim().indexOf('<html>') === 0)) {
+        AjaxResponseHandle(response);
+    }
+}
+

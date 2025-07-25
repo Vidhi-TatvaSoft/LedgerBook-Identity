@@ -17,13 +17,11 @@ public class Messages
     public static string PartyAddedWithOpeningBalance = "Party added with opening balance successfully.";
     public static string InvalidTokenBusinessNotFound = "Invalid token or business not found.";
 
-
     //global messages
-    public static string GlobalAddUpdateMesage = "{name} {status} successfully.";
-    public static string GlobalAddUpdateFailMessage = "Failed to {status} {name}. Try again!";
+    public static string GlobalAddUpdateMesage = "{0} {1} successfully.";
+    public static string GlobalAddUpdateFailMessage = "Failed to {0} {1}. Try again!";
     public static string VerificationSuccessMessage = "Email has been verified successfully.";
     public static string VerificationErrorMessage = "Verification failed.";
-
 
     //reset password
     public static string InvalidResetPasswordLink = "Invalid reset password link.";
@@ -44,30 +42,14 @@ public class Messages
     public static string SettleUpMessage = "Balance settled up successfully.";
     public static string SettleUpFailMessage = "Failed to settle up balance.";
 
-
-
     //activity logs messages
-    public static string ActivityMessage = "{0} '{1}' has been {2}.";
-
-    public static string AdduserToBusiness = "'{0}' has been added to '{1}' as '{2}'.";
-    public static string ActiveuserToBusiness = "'{0}' has been {1} from business '{2}'.";
-    public static string UpdateuserToBusiness = "'{0}'s' role in '{1}' has been updated to '{2}'.";
-    public static string DeleteuserFromBusiness = "'{0}' has been deleted from '{1}'.";
-
-
-    public static string UserLogInOut = "User {0} has logged {1}";
     public static string UserActivity = "{0} has been {1}.";
     public static string BusinessActivity = "{0} has been {1} by {2}.";
     public static string PartyActivity = "{0} '{1}' has been {2} to business '{3}' by {4}.";
     public static string PartyUpdateActivity = "{0} '{1}' in business '{2}' has been {3} by {4}.";
     public static string PartyDeleteActivity = "{0} '{1}' has been removed from business '{3}' by {4}.";
-
     public static string TransactionAddActivity = "{0} {1} has processed a transaction of ₹{2} for business '{3}' by {4}.";
     public static string TransactionActivity = "Transaction for {0} '{1}' in business '{2}' has been {3} by {4}.";
     public static string AddUserInBusinessActivity = "New user '{0}' invited by {1}.";
     public static string UserInBusinessActivity = "User '{0}' {1} by {2}.";
-    // public static string InactiveuserToBusiness = "'{0}' has been {1} by .";
-
-
-
 }

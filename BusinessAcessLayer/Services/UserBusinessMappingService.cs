@@ -42,9 +42,9 @@ public class UserBusinessMappingService : IUserBusinessMappingService
 
     public async Task<List<UserViewmodel>> GetUsersByBusiness(int businessId, int userId)
     {
-        var userMappingDetails =  _genericRepository.GetAll<UserBusinessMappings>(
-            predicate : ubm => ubm.BusinessId == businessId && ubm.DeletedAt == null && ubm.UserId != userId && ubm.UserId != ubm.Business.CreatedById,
-            includes : new List<Expression<Func<UserBusinessMappings, object>>>
+        var userMappingDetails = _genericRepository.GetAll<UserBusinessMappings>(
+            predicate: ubm => ubm.BusinessId == businessId && ubm.DeletedAt == null && ubm.UserId != userId && ubm.UserId != ubm.Business.CreatedById,
+            includes: new List<Expression<Func<UserBusinessMappings, object>>>
             {
                 x => x.User,
                 x => x.PersonalDetails,
@@ -52,10 +52,6 @@ public class UserBusinessMappingService : IUserBusinessMappingService
                 x => x.Business
             }
         ).GroupBy(userMappingKey => new { userMappingKey.BusinessId, userMappingKey.UserId }).ToList();
-
-        // var userMappingDetails = await _context.UserBusinessMappings.Include(a => a.User).Include(x => x.PersonalDetails).Include(a => a.Role).Include(x => x.Business)
-        // .Where(ubm => ubm.BusinessId == businessId && ubm.DeletedAt == null && ubm.UserId != userId && ubm.UserId != ubm.Business.CreatedById)
-        // .GroupBy(userMappingKey => new { userMappingKey.BusinessId, userMappingKey.UserId }).ToListAsync();
 
         return userMappingDetails.Select(selectedData =>
         {
@@ -114,7 +110,7 @@ public class UserBusinessMappingService : IUserBusinessMappingService
 
     public bool IsMainOwner(int businessId, int loginUserId)
     {
-        var mainOwner = _genericRepository.Get<UserBusinessMappings>(x => x.BusinessId == businessId && x.UserId == x.CreatedById);
+        UserBusinessMappings mainOwner = _genericRepository.Get<UserBusinessMappings>(x => x.BusinessId == businessId && x.UserId == x.CreatedById);
         if (mainOwner != null)
         {
             if (mainOwner.UserId == loginUserId)
@@ -196,17 +192,17 @@ public class UserBusinessMappingService : IUserBusinessMappingService
     public List<RoleViewModel> GetRolesByBusinessId(int businessId, int userId)
     {
         return _genericRepository.GetAll<UserBusinessMappings>(
-            predicate : ubm => ubm.BusinessId == businessId && ubm.UserId == userId && ubm.DeletedAt == null && ubm.IsActive,
-            includes : new List<Expression<Func<UserBusinessMappings, object>>>
+            predicate: ubm => ubm.BusinessId == businessId && ubm.UserId == userId && ubm.DeletedAt == null && ubm.IsActive,
+            includes: new List<Expression<Func<UserBusinessMappings, object>>>
             {
                 x => x.Role
             }
         ).Select(x => new RoleViewModel
-            {
-                RoleId = x.Role.Id,
-                RoleName = x.Role.RoleName,
-                RoleDescription = x.Role.Description
-            }).ToList();
+        {
+            RoleId = x.Role.Id,
+            RoleName = x.Role.RoleName,
+            RoleDescription = x.Role.Description
+        }).ToList();
         //  _context.UserBusinessMappings.Include(a => a.Role)
         //     .Where(ubm => ubm.BusinessId == businessId && ubm.UserId == userId && ubm.DeletedAt == null)
         //     .Select(x => new RoleViewModel

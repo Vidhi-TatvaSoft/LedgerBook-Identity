@@ -214,38 +214,32 @@ public class PartyController : BaseController
             if (transactionId != 0)
             {
                 return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, Messages.PartyAddedWithOpeningBalance));
-                // return Json(new { success = true, message = "Party Added With opening balance successfully" });
             }
             else
             {
-                return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, Messages.GlobalAddUpdateMesage.Replace("{name}", "Party").Replace("{status}", "added")));
-                // return Json(new { success = true, message = "Party added successfully" });
+                return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, string.Format(Messages.GlobalAddUpdateMesage, "Party", "added")));
             }
         }
         if (partyTransactionVM.PartyViewModel.PartyId != 0)
         {
             if (partyId != 0)
             {
-                return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, Messages.GlobalAddUpdateMesage.Replace("{name}", "Party").Replace("{status}", "updated")));
-                // return Json(new { success = true, message = "Party updated successfully" });
+                return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, string.Format(Messages.GlobalAddUpdateMesage, "Party", "updated")));
             }
             else
             {
-                return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, Messages.GlobalAddUpdateFailMessage.Replace("{name}", "party").Replace("{status}", "update"), ErrorType.Error));
-                // return Json(new { success = false, message = "Failed to update Party. Try again!" });
+                return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, string.Format(Messages.GlobalAddUpdateFailMessage, "update", "party"), ErrorType.Error));
             }
         }
         else
         {
             if (partyId != 0)
             {
-                return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, Messages.GlobalAddUpdateMesage.Replace("{name}", "Party").Replace("{status}", "added")));
-                // return Json(new { success = true, message = "Party added successfully" });
+                return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, string.Format(Messages.GlobalAddUpdateMesage, "Party", "added")));
             }
             else
             {
-                return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, Messages.GlobalAddUpdateFailMessage.Replace("{name}", "party").Replace("{status}", "add"), ErrorType.Error));
-                // return Json(new { success = false, message = "Failed to add Party. Try again!" });
+                return Json(await PartialViewResponse("Party/_savePartyModalPartial.cshtml", partyTransactionVM, string.Format(Messages.GlobalAddUpdateFailMessage, "add", "party"), ErrorType.Error));
             }
         }
     }
@@ -368,12 +362,12 @@ public class PartyController : BaseController
                 if (transactionEntryVM.TransactionId == 0)
                 {
                     transactionEntryVM.TransactionId = transactionId;
-                    return Json(await PartialViewResponse("Party/_SaveTransactionEntryModal.cshtml", transactionEntryVM, Messages.GlobalAddUpdateMesage.Replace("{name}", "Transaction").Replace("{status}", "added")));
+                    return Json(await PartialViewResponse("Party/_SaveTransactionEntryModal.cshtml", transactionEntryVM, string.Format(Messages.GlobalAddUpdateMesage, "Transaction", "added")));
                 }
                 else
                 {
                     transactionEntryVM.TransactionId = transactionId;
-                    return Json(await PartialViewResponse("Party/_SaveTransactionEntryModal.cshtml", transactionEntryVM, Messages.GlobalAddUpdateMesage.Replace("{name}", "Transaction").Replace("{status}", "updated")));
+                    return Json(await PartialViewResponse("Party/_SaveTransactionEntryModal.cshtml", transactionEntryVM, string.Format(Messages.GlobalAddUpdateMesage, "Transaction", "updated")));
                 }
             }
             else
@@ -381,12 +375,12 @@ public class PartyController : BaseController
                 if (transactionEntryVM.TransactionId == 0)
                 {
                     transactionEntryVM.TransactionId = transactionId;
-                    return Json(await PartialViewResponse("Party/_SaveTransactionEntryModal.cshtml", transactionEntryVM, Messages.GlobalAddUpdateFailMessage.Replace("{name}", "Transaction").Replace("{status}", "add")));
+                    return Json(await PartialViewResponse("Party/_SaveTransactionEntryModal.cshtml", transactionEntryVM, string.Format(Messages.GlobalAddUpdateFailMessage, "add", "transaction")));
                 }
                 else
                 {
                     transactionEntryVM.TransactionId = transactionId;
-                    return Json(await PartialViewResponse("Party/_SaveTransactionEntryModal.cshtml", transactionEntryVM, Messages.GlobalAddUpdateFailMessage.Replace("{name}", "Transaction").Replace("{status}", "updae")));
+                    return Json(await PartialViewResponse("Party/_SaveTransactionEntryModal.cshtml", transactionEntryVM, string.Format(Messages.GlobalAddUpdateFailMessage, "update", "transaction")));
                 }
             }
         }
@@ -402,11 +396,11 @@ public class PartyController : BaseController
         int partyId = _partyService.DeleteTransaction(transactionId, user.Id);
         if (partyId != 0)
         {
-            return Json(new { success = true, message = Messages.GlobalAddUpdateMesage.Replace("{name}", "Transaction").Replace("{status}", "deleted"), partyId = partyId });
+            return Json(new { success = true, message = string.Format(Messages.GlobalAddUpdateMesage, "Transaction", "deleted"), partyId = partyId });
         }
         else
         {
-            return Json(new { success = false, message = Messages.GlobalAddUpdateFailMessage.Replace("{name}", "Transaction").Replace("{status}", "delete"), partyId = partyId });
+            return Json(new { success = false, message = string.Format(Messages.GlobalAddUpdateFailMessage, "delete", "transaction"), partyId = partyId });
         }
     }
     #endregion
@@ -429,7 +423,7 @@ public class PartyController : BaseController
         totalAmountViewModel.AmountToGive = 0;
         if (parties.Count != 0)
         {
-            foreach (var party in parties)
+            foreach (PartyViewModel party in parties)
             {
                 if (party.TransactionType == EnumHelper.TransactionType.GAVE)
                 {
@@ -461,10 +455,10 @@ public class PartyController : BaseController
     public async Task<IActionResult> SettleUpParty(decimal netBalance, int partyId)
     {
         ApplicationUser user = GetCurrentUserIdentity();
-         if (user == null)
+        if (user == null)
             return RedirectToAction("Index", "Business");
         Businesses business = GetBusinessFromToken();
-         if (business == null)
+        if (business == null)
             return RedirectToAction("Index", "Business");
         TransactionEntryViewModel transactionEntryVM = new();
         transactionEntryVM.PartyId = partyId;

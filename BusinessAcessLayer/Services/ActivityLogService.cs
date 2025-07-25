@@ -41,7 +41,7 @@ public class ActivityLogService : IActivityLogService
         int OwnerRoleId = _genericRepository.Get<Role>(x => x.RoleName == ConstantVariables.OwnerRole).Id;
         foreach (int businessId in businessIdsList)
         {
-            var mappings = _genericRepository.GetAll<UserBusinessMappings>(x => x.BusinessId == businessId && !x.DeletedAt.HasValue && x.RoleId == OwnerRoleId && x.IsActive);
+            IEnumerable<UserBusinessMappings> mappings = _genericRepository.GetAll<UserBusinessMappings>(x => x.BusinessId == businessId && !x.DeletedAt.HasValue && x.RoleId == OwnerRoleId && x.IsActive);
             if (mappings.Any(x => x.UserId == userId))
             {
                 businessIdToDisplay.Add(businessId);
@@ -132,7 +132,7 @@ public class ActivityLogService : IActivityLogService
             SubEntityTypeId = x.SubEntityTypeId
         }).ToList();
 
-        foreach (var activity in activityList)
+        foreach (ActivityLogsViewModel activity in activityList)
         {
             ApplicationUser usercreatedBy = _genericRepository.Get<ApplicationUser>(x => x.Id == activity.CreatedById);
             activity.createdByName = usercreatedBy.FirstName + " " + usercreatedBy.LastName;
@@ -185,7 +185,7 @@ public class ActivityLogService : IActivityLogService
         }
 
         int totalCount = activityList.Count();
-        var items = activityList.Skip((activityDataVM.PageNumber - 1) * activityDataVM.PageSize).Take(activityDataVM.PageSize).ToList();
+        List<ActivityLogsViewModel> items = activityList.Skip((activityDataVM.PageNumber - 1) * activityDataVM.PageSize).Take(activityDataVM.PageSize).ToList();
         return new PaginationViewModel<ActivityLogsViewModel>(items, totalCount, activityDataVM.PageNumber, activityDataVM.PageSize);
     }
 }

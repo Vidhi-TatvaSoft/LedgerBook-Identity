@@ -42,32 +42,20 @@ public class LoginController : BaseController
         string token = Request.Cookies[TokenKey.UserToken];
         if (token != null)
         {
-            if (Request.Cookies[TokenKey.RememberMe] != null)
+            ApplicationUser user = _loginService.GetUserFromTokenIdentity(token);
+            if (user == null)
             {
-                return RedirectToAction("Index", "Business");
+                return View();
             }
             else
             {
-
-                if (string.IsNullOrEmpty(token))
+                if (user.ProfileAttachmentId != null)
                 {
-                    throw new Exception("User is not authenticated. Please log in.");
+                    AttachmentViewModel attachmentViewModel = _attachmentService.GetAttachmentById((int)user.ProfileAttachmentId);
+                    _cookieService.SetCookie(Response, TokenKey.ProfilePhoto, attachmentViewModel.BusinesLogoPath);
                 }
-                ApplicationUser user = _loginService.GetUserFromTokenIdentity(token);
-                if (user == null)
-                {
-                    return View();
-                }
-                else
-                {
-                    if (user.ProfileAttachmentId != null)
-                    {
-                        AttachmentViewModel attachmentViewModel = _attachmentService.GetAttachmentById((int)user.ProfileAttachmentId);
-                        _cookieService.SetCookie(Response, TokenKey.ProfilePhoto, attachmentViewModel.BusinesLogoPath);
-                    }
-                    _cookieService.SetCookie(Response, TokenKey.UserName, user.FirstName + " " + user.LastName);
-                    return RedirectToAction("Index", "Business");
-                }
+                _cookieService.SetCookie(Response, TokenKey.UserName, user.FirstName + " " + user.LastName);
+                return RedirectToAction("Index", "Business");
             }
         }
         return View();
@@ -128,7 +116,7 @@ public class LoginController : BaseController
                 }
                 else
                 {
-                    partialViewResponseModel = await PartialViewResponse("Login/_RegistrationFormPartial.cshtml", registrationViewModel, "Something went wrong...!", ErrorType.Error);
+                    partialViewResponseModel = await PartialViewResponse("Login/_RegistrationFormPartial.cshtml", registrationViewModel, Messages.ExceptionMessage, ErrorType.Error);
                 }
             }
         }
@@ -139,8 +127,8 @@ public class LoginController : BaseController
     #region verify email
     public async Task<IActionResult> VerifyEmail(string verificationCode)
     {
-        var email = _jwtTokenService.GetClaimValue(verificationCode, "email");
-        var emailToken = _jwtTokenService.GetClaimValue(verificationCode, "token");
+        string email = _jwtTokenService.GetClaimValue(verificationCode, "email");
+        string emailToken = _jwtTokenService.GetClaimValue(verificationCode, "token");
         bool isEmailVerified = await _loginService.EmailVerification(email, emailToken);
         if (isEmailVerified)
         {
@@ -182,13 +170,13 @@ public class LoginController : BaseController
                 }
                 else
                 {
-                    if (await _loginService.VerifyPassword(loginViewModel) != null)
+                    string verificaitonToken = await _loginService.VerifyPassword(loginViewModel);
+                    if (verificaitonToken != null)
                     {
-                        string verifictiontoken =await _loginService.VerifyPassword(loginViewModel);
-                        if (verifictiontoken != null)
+                        if (verificaitonToken != null)
                         {
-                            _cookieService.SetCookie(Response, TokenKey.UserToken, verifictiontoken);
-                            ApplicationUser user = _loginService.GetUserFromTokenIdentity(verifictiontoken);
+                            _cookieService.SetCookie(Response, TokenKey.UserToken, verificaitonToken);
+                            ApplicationUser user = _loginService.GetUserFromTokenIdentity(verificaitonToken);
                             if (user == null)
                             {
                                 return View();
@@ -349,7 +337,7 @@ public class LoginController : BaseController
             PasswordVerificationResult result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, resetPasswordViewModel.Password);
             if (result != PasswordVerificationResult.Failed)
             {
-                 TempData["ErrorMessage"] = Messages.SamePasswordsErrorMessage;
+                TempData["ErrorMessage"] = Messages.SamePasswordsErrorMessage;
                 return View();
             }
             else
@@ -357,12 +345,12 @@ public class LoginController : BaseController
                 bool IsPasswordUpdated = await _userService.UpdatePassword(resetPasswordViewModel);
                 if (IsPasswordUpdated)
                 {
-                    TempData["SuccessMessage"] = Messages.GlobalAddUpdateMesage.Replace("{name}", "Password").Replace("{status}", "updated");
+                    TempData["SuccessMessage"] = string.Format(Messages.GlobalAddUpdateMesage, "Password", "updated");
                     return RedirectToAction("Login", "Login");
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = Messages.GlobalAddUpdateFailMessage.Replace("{name}", "Password").Replace("{status}", "update");
+                    TempData["ErrorMessage"] = string.Format(Messages.GlobalAddUpdateFailMessage, "update", "Password");
                     return View();
                 }
             }

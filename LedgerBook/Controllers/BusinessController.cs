@@ -83,7 +83,6 @@ public class BusinessController : BaseController
     public async Task<IActionResult> CreateBusinessModalDisplay(int? businessId)
     {
         BusinessMainViewModel businessMainVM = new();
-        // throw new Exception("Test Exception");
 
         businessMainVM.BusinessDetailViewModel.BusinessCategories = _referenceDataEntityService.GetReferenceValues(EnumHelper.EntityType.BusinessCategory.ToString());
         businessMainVM.BusinessDetailViewModel.BusinessTypes = _referenceDataEntityService.GetReferenceValues(EnumHelper.EntityType.BusinessType.ToString());
@@ -103,9 +102,7 @@ public class BusinessController : BaseController
             businessMainVM.UserPermissionViewModel.Users = await _userBusinessMappingService.GetUsersByBusiness((int)businessId, user.Id);
             businessMainVM.UserPermissionViewModel.Users = _userBusinessMappingService.SetPermissions(businessMainVM.UserPermissionViewModel.Users, user.Id, (int)businessId);
         }
-        ViewBag.Categories = new SelectList(businessMainVM.BusinessDetailViewModel.BusinessCategories, "Id", "EntityValue");
-        ViewBag.Types = new SelectList(businessMainVM.BusinessDetailViewModel.BusinessTypes, "Id", "EntityValue");
-        ViewBag.Roles = new SelectList(businessMainVM.BusinessDetailViewModel.Roles, "RoleId", "RoleName");
+        SetViewBag(businessMainVM.BusinessDetailViewModel.BusinessCategories, businessMainVM.BusinessDetailViewModel.BusinessTypes);
         return PartialView("_AddBusinessDetailsPartial", businessMainVM);
     }
     #endregion
@@ -114,9 +111,7 @@ public class BusinessController : BaseController
     public IActionResult DisplayBusinessDetails(string businessVM)
     {
         BusinessMainViewModel businessMainVM = JsonConvert.DeserializeObject<BusinessMainViewModel>(businessVM);
-        ViewBag.Categories = new SelectList(businessMainVM.BusinessDetailViewModel.BusinessCategories, "Id", "EntityValue");
-        ViewBag.Types = new SelectList(businessMainVM.BusinessDetailViewModel.BusinessTypes, "Id", "EntityValue");
-        ViewBag.Roles = new SelectList(businessMainVM.BusinessDetailViewModel.Roles, "RoleId", "RoleName");
+        SetViewBag(businessMainVM.BusinessDetailViewModel.BusinessCategories, businessMainVM.BusinessDetailViewModel.BusinessTypes);
         return PartialView("_AddBusinessDetailsPartial", businessMainVM);
     }
     #endregion
@@ -129,9 +124,7 @@ public class BusinessController : BaseController
         {
             businessMainVM.UserPermissionViewModel.Users = new();
         }
-        ViewBag.Categories = new SelectList(businessMainVM.BusinessDetailViewModel.BusinessCategories, "Id", "EntityValue");
-        ViewBag.Types = new SelectList(businessMainVM.BusinessDetailViewModel.BusinessTypes, "Id", "EntityValue");
-        ViewBag.Roles = new SelectList(businessMainVM.BusinessDetailViewModel.Roles, "RoleId", "RoleName");
+        SetViewBag(businessMainVM.BusinessDetailViewModel.BusinessCategories, businessMainVM.BusinessDetailViewModel.BusinessTypes);
         return PartialView("_AddUserDetailsPartial", businessMainVM);
     }
     #endregion
@@ -165,7 +158,6 @@ public class BusinessController : BaseController
         {
             businessMainVM.BusinessDetailViewModel.Roles = _roleService.GetRolesExceptOwner();
         }
-        ViewBag.Roles = new SelectList(businessMainVM.BusinessDetailViewModel.Roles, "RoleId", "RoleName");
         return PartialView("_CreateUserModalPartial", businessMainVM);
     }
     #endregion
@@ -178,6 +170,7 @@ public class BusinessController : BaseController
         {
             BusinessMainViewModel businessMainVM = JsonConvert.DeserializeObject<BusinessMainViewModel>(businessFormDetails.BusinessViewModelString);
             List<int> selectedRoles = JsonConvert.DeserializeObject<List<int>>(businessFormDetails.MappingRoles);
+
             if (businessMainVM.UserPermissionViewModel.Users == null)
             {
                 businessMainVM.UserPermissionViewModel.Users = new();
@@ -295,7 +288,6 @@ public class BusinessController : BaseController
 
             businessMainVM.UserPermissionViewModel.Users = await _userBusinessMappingService.GetUsersByBusiness(businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id);
             businessMainVM.UserPermissionViewModel.Users = _userBusinessMappingService.SetPermissions(businessMainVM.UserPermissionViewModel.Users, user.Id, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId);
-            ViewBag.Roles = new SelectList(businessMainVM.BusinessDetailViewModel.Roles, "RoleId", "RoleName");
 
             return PartialView("_AddUserDetailsPartial", businessMainVM);
         }
@@ -319,15 +311,12 @@ public class BusinessController : BaseController
         bool isDeletedMapping = await _userBusinessMappingService.DeleteUserBusinessMappingByBusinessId(userId, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id);
         UserViewmodel deletedUser = businessMainVM.UserPermissionViewModel.Users.FirstOrDefault(x => x.UserId == userId);
         businessMainVM.UserPermissionViewModel.Users.Remove(deletedUser);
-        ViewBag.Roles = new SelectList(businessMainVM.BusinessDetailViewModel.Roles, "RoleId", "RoleName");
         string loginLink = Url.Action("Login", "Login", new { }, Request.Scheme);
         Task.Run(async () =>
                   {
                       CommonMethods.DeleteUserEmail(user1.Email, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessName, loginLink);
                   });
-        // string message = string.Format(Messages.userToBusiness, businessFormDetails.UserPermissionViewModel.UserDetail.FirstName + " " + businessFormDetails.UserPermissionViewModel.UserDetail.LastName, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessName, businessFormDetails.UserPermissionViewModel.UserDetail.RoleName);
         string message = string.Format(Messages.UserInBusinessActivity, deletedUser.FirstName + " " + deletedUser.LastName, "deleted", user.FirstName + " " + user.LastName);
-        // string message = string.Format(Messages.DeleteuserFromBusiness, user1.FirstName + " " + user1.LastName, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessName);
 
         await SetActivityLog(message, EnumHelper.Actiontype.Delete, EnumHelper.ActivityEntityType.Business, businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id, EnumHelper.ActivityEntityType.Role, user1.UserId);
         return PartialView("_AddUserDetailsPartial", businessMainVM);
@@ -390,7 +379,7 @@ public class BusinessController : BaseController
         int businessId = await _businessService.SaveBusiness(businessMainVM.BusinessDetailViewModel.BusinessItem, user.Id);
         if (businessId == 0)
         {
-            throw new Exception(Messages.GlobalAddUpdateFailMessage.Replace("{status}", "add").Replace("{name}", "business"));
+            throw new Exception(string.Format(Messages.GlobalAddUpdateFailMessage, "add", "business"));
             return Json(false);
         }
 
@@ -400,9 +389,7 @@ public class BusinessController : BaseController
         businessMainVM.BusinessDetailViewModel.BusinessTypes = _referenceDataEntityService.GetReferenceValues(EnumHelper.EntityType.BusinessType.ToString());
         businessMainVM.BusinessDetailViewModel.Roles = _roleService.GetAllRoles();
         businessMainVM.BusinessViewModelString = null;
-        ViewBag.Categories = new SelectList(businessMainVM.BusinessDetailViewModel.BusinessCategories, "Id", "EntityValue");
-        ViewBag.Types = new SelectList(businessMainVM.BusinessDetailViewModel.BusinessTypes, "Id", "EntityValue");
-        ViewBag.Roles = new SelectList(businessMainVM.BusinessDetailViewModel.Roles, "RoleId", "RoleName");
+        SetViewBag(businessMainVM.BusinessDetailViewModel.BusinessCategories, businessMainVM.BusinessDetailViewModel.BusinessTypes);
 
         businessMainVM.UserPermissionViewModel.Users = await _userBusinessMappingService.GetUsersByBusiness(businessMainVM.BusinessDetailViewModel.BusinessItem.BusinessId, user.Id);
         businessMainVM.UserPermissionViewModel.Users = _userBusinessMappingService.SetPermissions(businessMainVM.UserPermissionViewModel.Users, user.Id, businessId);
@@ -471,11 +458,11 @@ public class BusinessController : BaseController
         bool isBusinessdeleted = await _businessService.DeleteBusiness(businessId, user.Id);
         if (isBusinessdeleted)
         {
-            return Json(new { success = true, message = Messages.GlobalAddUpdateMesage.Replace("{name}", "Business").Replace("{status}", "deleted") });
+            return Json(new { success = true, message = string.Format(Messages.GlobalAddUpdateMesage, "Business", "deleted") });
         }
         else
         {
-            return Json(new { success = false, message = Messages.GlobalAddUpdateMesage.Replace("{name}", "business").Replace("{status}", "delete") });
+            return Json(new { success = false, message = string.Format(Messages.GlobalAddUpdateMesage, "business", "delete") });
         }
     }
     #endregion
@@ -541,28 +528,27 @@ public class BusinessController : BaseController
             {
                 message = string.Format(Messages.UserInBusinessActivity, userUpdated.FirstName + " " + userUpdated.LastName, "activated", user.FirstName + " " + user.LastName);
                 await SetActivityLog(message, EnumHelper.Actiontype.Update, EnumHelper.ActivityEntityType.Business, businessId, user.Id, EnumHelper.ActivityEntityType.Role, userId);
-                partialViewResponseModel = await PartialViewResponse("Business/_AddUserDetailsPartial.cshtml", businessMainVM, Messages.GlobalAddUpdateMesage.Replace("{name}", "User").Replace("{status}", "activated"));
+                partialViewResponseModel = await PartialViewResponse("Business/_AddUserDetailsPartial.cshtml", businessMainVM, string.Format(Messages.GlobalAddUpdateMesage, "User", "activated"));
             }
             else
             {
                 message = string.Format(Messages.UserInBusinessActivity, userUpdated.FirstName + " " + userUpdated.LastName, "inactivated", user.FirstName + " " + user.LastName);
                 await SetActivityLog(message, EnumHelper.Actiontype.Update, EnumHelper.ActivityEntityType.Business, businessId, user.Id, EnumHelper.ActivityEntityType.Role, userId);
-                partialViewResponseModel = await PartialViewResponse("Business/_AddUserDetailsPartial.cshtml", businessMainVM, Messages.GlobalAddUpdateMesage.Replace("{name}", "User").Replace("{status}", "inactivated"));
+                partialViewResponseModel = await PartialViewResponse("Business/_AddUserDetailsPartial.cshtml", businessMainVM, string.Format(Messages.GlobalAddUpdateMesage, "User", "inactivated"));
             }
         }
         else
         {
             if (isActive)
             {
-                partialViewResponseModel = await PartialViewResponse("Business/_AddUserDetailsPartial.cshtml", businessMainVM, Messages.GlobalAddUpdateFailMessage.Replace("{name}", "user").Replace("{status}", "activate"), ErrorType.Error);
+                partialViewResponseModel = await PartialViewResponse("Business/_AddUserDetailsPartial.cshtml", businessMainVM, string.Format(Messages.GlobalAddUpdateFailMessage, "activate", "user"), ErrorType.Error);
             }
             else
             {
-                partialViewResponseModel = await PartialViewResponse("Business/_AddUserDetailsPartial.cshtml", businessMainVM, Messages.GlobalAddUpdateFailMessage.Replace("{name}", "user").Replace("{status}", "inactivate"), ErrorType.Error);
+                partialViewResponseModel = await PartialViewResponse("Business/_AddUserDetailsPartial.cshtml", businessMainVM, string.Format(Messages.GlobalAddUpdateFailMessage, "inactivated", "user"), ErrorType.Error);
             }
         }
         return Json(partialViewResponseModel);
-
     }
     #endregion
 

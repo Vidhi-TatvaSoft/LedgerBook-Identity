@@ -26,20 +26,20 @@ public class JWTTokenService : IJWTTokenService
         _issuer = configuration.GetValue<string>("JwtConfig:Issuer");
         _audiance = configuration.GetValue<string>("JwtConfig:Audience");
 
-       
+
         _genericRepository = genericRepository;
     }
 
     public string GenerateToken(string email)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+        SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         ApplicationUser user = _genericRepository.Get<ApplicationUser>(u => u.Email == email && !u.DeletedAt.HasValue)!;
         string UserId = user.Id.ToString();
         string FirstName = user.FirstName;
         string LastName = user.LastName;
 
-        var claims = new[]
+        Claim[] claims = new[]
         {
                 new Claim("email", email),
                 new Claim("id", UserId),
@@ -48,7 +48,7 @@ public class JWTTokenService : IJWTTokenService
                 new Claim("role","User")
         };
 
-        var token = new JwtSecurityToken(
+        JwtSecurityToken token = new JwtSecurityToken(
             issuer: _issuer,
             audience: _audiance,
             claims: claims,
@@ -61,16 +61,16 @@ public class JWTTokenService : IJWTTokenService
 
     public string GenerateTokenEmailVerificationToken(string email, string verificationToken)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+        SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        Claim[] claims = new[]
         {
                 new Claim("email", email),
                 new Claim("token", verificationToken)
             };
 
-        var token = new JwtSecurityToken(
+        JwtSecurityToken token = new JwtSecurityToken(
             issuer: "localhost",
             audience: "localhost",
             claims: claims,
@@ -83,10 +83,10 @@ public class JWTTokenService : IJWTTokenService
 
     public string GenerateTokenPartyEmailVerification(string email, string verificationToken, int partyId, string businessName, string partyType)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+        SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        Claim[] claims = new[]
         {
                 new Claim("email", email),
                 new Claim("token", verificationToken),
@@ -96,7 +96,7 @@ public class JWTTokenService : IJWTTokenService
 
             };
 
-        var token = new JwtSecurityToken(
+        JwtSecurityToken token = new JwtSecurityToken(
             issuer: "localhost",
             audience: "localhost",
             claims: claims,
@@ -109,16 +109,16 @@ public class JWTTokenService : IJWTTokenService
 
     public string GenerateTokenEmailPassword(string email, string password)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+        SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        Claim[] claims = new[]
         {
                 new Claim("email", email),
                 new Claim("password", password)
             };
 
-        var token = new JwtSecurityToken(
+        JwtSecurityToken token = new JwtSecurityToken(
             issuer: "localhost",
             audience: "localhost",
             claims: claims,
@@ -132,19 +132,19 @@ public class JWTTokenService : IJWTTokenService
 
     public string GenerateBusinessToken(int businessId)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+        SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         Businesses business = _genericRepository.Get<Businesses>(b => b.Id == businessId && b.DeletedAt == null)!;
         string businessIdTemp = business.Id.ToString();
         string businessName = business.BusinessName;
 
-        var claims = new[]
+        Claim[] claims = new[]
         {
                 new Claim("id", businessIdTemp),
                 new Claim("name", businessName)
         };
 
-        var token = new JwtSecurityToken(
+        JwtSecurityToken token = new JwtSecurityToken(
             issuer: _issuer,
             audience: _audiance,
             claims: claims,
@@ -157,9 +157,9 @@ public class JWTTokenService : IJWTTokenService
 
     public ClaimsPrincipal? GetClaimsFromToken(string token)
     {
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
-        var claims = new ClaimsIdentity(jwtToken.Claims);
+        JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+        JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
+        ClaimsIdentity claims = new ClaimsIdentity(jwtToken.Claims);
         return new ClaimsPrincipal(claims);
     }
 
@@ -168,14 +168,14 @@ public class JWTTokenService : IJWTTokenService
     {
         try
         {
-            var claimsPrincipal = GetClaimsFromToken(token);
-            var value = claimsPrincipal?.FindFirst(claimType)?.Value;
+            ClaimsPrincipal claimsPrincipal = GetClaimsFromToken(token);
+            string value = claimsPrincipal?.FindFirst(claimType)?.Value;
             return value;
         }
         catch (Exception e)
         {
             throw new("Invalid Token Exception");
         }
-        
+
     }
 }

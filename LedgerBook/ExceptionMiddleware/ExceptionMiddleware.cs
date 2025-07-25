@@ -79,7 +79,7 @@ public class ExceptionMiddleware
         {
             if (!context.Response.HasStarted)
             {
-                var redirectUrl = $"/ErrorPage/HandleError/{(int)code}";
+                string redirectUrl = $"/ErrorPage/HandleError/{(int)code}";
                 context.Response.StatusCode = (int)HttpStatusCode.Redirect;
                 context.Response.Headers["Location"] = redirectUrl;
                 await context.Response.CompleteAsync();

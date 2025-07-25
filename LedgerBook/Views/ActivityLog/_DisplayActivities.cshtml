@@ -16,103 +16,103 @@
             <tbody class="">
 @if (Model.Items.Count != 0)
 {
-    @foreach (var activity in Model.Items)
+    @foreach (ActivityLogsViewModel activity in Model.Items)
     {
-                        <tr>
-                            <td class="text-nowrap ">@activity.ActivityDate</td>
-                            <td class="text-nowrap text-center">@activity.ActivityTime</td>
-                            <td class="text-nowrap">
-                                @switch(activity.EntityType){
-                                    case EnumHelper.ActivityEntityType.User:
+        <tr>
+            <td class="text-nowrap ">@activity.ActivityDate</td>
+            <td class="text-nowrap text-center">@activity.ActivityTime</td>
+            <td class="text-nowrap">
+                @switch(activity.EntityType){
+                    case EnumHelper.ActivityEntityType.User:
+                        @switch (activity.Action)
+                        {
+                            case EnumHelper.Actiontype.Add:
+                                @string.Format(Messages.UserActivity,"User","added");
+                                break;
+                            case EnumHelper.Actiontype.Update:
+                                @string.Format(Messages.BusinessActivity,"User","updated",activity.createdByName);
+                                break;
+                            case EnumHelper.Actiontype.Delete:
+                            break;
+                        }
+                        break;
+                    case EnumHelper.ActivityEntityType.Business:
+                        if(activity.SubEntityType != null){
+                            switch(activity.SubEntityType){
+                                case EnumHelper.ActivityEntityType.Party:
+                                    @switch (activity.Action)
+                                    {
+                                        case EnumHelper.Actiontype.Add:
+                                            @string.Format(Messages.PartyActivity,activity.PartyType, activity.PartyName,"added", activity.EntityTypeName,activity.createdByName);
+                                            break;
+                                        case EnumHelper.Actiontype.Update:
+                                            @string.Format(Messages.PartyUpdateActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"updated",activity.createdByName);
+                                            break;
+                                        case EnumHelper.Actiontype.Delete:
+                                            break;
+                                    }
+                                break;
+                                case EnumHelper.ActivityEntityType.Transaction:
+                                    @if(activity.IsSettled){
+                                            @string.Format(Messages.TransactionActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"mark as paid",activity.createdByName);
+                                    }else{
                                         @switch (activity.Action)
                                         {
                                             case EnumHelper.Actiontype.Add:
-                                                @string.Format(Messages.UserActivity,"User","added");
+                                                @string.Format(Messages.TransactionAddActivity,activity.PartyType, activity.PartyName,activity.TransactionAMount, activity.EntityTypeName,activity.createdByName);
                                                 break;
                                             case EnumHelper.Actiontype.Update:
-                                                @string.Format(Messages.BusinessActivity,"User","updated",activity.createdByName);
+                                                @string.Format(Messages.TransactionActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"updated",activity.createdByName);
                                                 break;
                                             case EnumHelper.Actiontype.Delete:
+                                                @string.Format(Messages.TransactionActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"deleted",activity.createdByName);
+                                                break;
+                                        } 
+                                    }
+                                break;
+                                case EnumHelper.ActivityEntityType.Role:
+                                    @switch (activity.Action)
+                                    {
+                                        case EnumHelper.Actiontype.Add:
+                                            @string.Format(Messages.AddUserInBusinessActivity, activity.SubEntityTypeName,activity.createdByName);
                                             break;
-                                        }
-                                        break;
-                                    case EnumHelper.ActivityEntityType.Business:
-                                        if(activity.SubEntityType != null){
-                                            switch(activity.SubEntityType){
-                                                case EnumHelper.ActivityEntityType.Party:
-                                                    @switch (activity.Action)
-                                                    {
-                                                        case EnumHelper.Actiontype.Add:
-                                                            @string.Format(Messages.PartyActivity,activity.PartyType, activity.PartyName,"added", activity.EntityTypeName,activity.createdByName);
-                                                            break;
-                                                        case EnumHelper.Actiontype.Update:
-                                                            @string.Format(Messages.PartyUpdateActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"updated",activity.createdByName);
-                                                            break;
-                                                        case EnumHelper.Actiontype.Delete:
-                                                            break;
-                                                    }
-                                                break;
-                                                case EnumHelper.ActivityEntityType.Transaction:
-                                                    @if(activity.IsSettled){
-                                                            @string.Format(Messages.TransactionActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"mark as paid",activity.createdByName);
-                                                    }else{
-                                                        @switch (activity.Action)
-                                                        {
-                                                            case EnumHelper.Actiontype.Add:
-                                                                @string.Format(Messages.TransactionAddActivity,activity.PartyType, activity.PartyName,activity.TransactionAMount, activity.EntityTypeName,activity.createdByName);
-                                                                break;
-                                                            case EnumHelper.Actiontype.Update:
-                                                                @string.Format(Messages.TransactionActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"updated",activity.createdByName);
-                                                                break;
-                                                            case EnumHelper.Actiontype.Delete:
-                                                                @string.Format(Messages.TransactionActivity,activity.PartyType, activity.PartyName, activity.EntityTypeName,"deleted",activity.createdByName);
-                                                                break;
-                                                        } 
-                                                    }
-                                                break;
-                                                case EnumHelper.ActivityEntityType.Role:
-                                                    @switch (activity.Action)
-                                                    {
-                                                        case EnumHelper.Actiontype.Add:
-                                                            @string.Format(Messages.AddUserInBusinessActivity, activity.SubEntityTypeName,activity.createdByName);
-                                                            break;
-                                                        case EnumHelper.Actiontype.Update:
-                                                            @if(activity.IsActive || activity.IsInactive){
-                                                                @if(activity.IsActive){
-                                                                @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "activated", activity.createdByName);
+                                        case EnumHelper.Actiontype.Update:
+                                            @if(activity.IsActive || activity.IsInactive){
+                                                @if(activity.IsActive){
+                                                @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "activated", activity.createdByName);
 
-                                                                }else{
-                                                                @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "inactivated", activity.createdByName);
-                                                                }
-                                                            }else{
-                                                                @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "updated", activity.createdByName);
-                                                            }
-                                                            break;
-                                                        case EnumHelper.Actiontype.Delete:
-                                                            @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "deleted", activity.createdByName);
-                                                            break;
-                                                    } 
-                                                    break;
+                                                }else{
+                                                @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "inactivated", activity.createdByName);
+                                                }
+                                            }else{
+                                                @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "updated", activity.createdByName);
                                             }
-                                        }else{
-                                             @switch (activity.Action)
-                                            {
-                                                case EnumHelper.Actiontype.Add:
-                                                    @string.Format(Messages.BusinessActivity,"Business","added",activity.createdByName);
-                                                    break;
-                                                case EnumHelper.Actiontype.Update:
-                                                    @string.Format(Messages.BusinessActivity,"Business","updated",activity.createdByName);
-                                                    break;
-                                                case EnumHelper.Actiontype.Delete:
-                                                    @string.Format(Messages.BusinessActivity,"Business","deleted",activity.createdByName);
-                                                    break;
-                                            }
-                                        }
+                                            break;
+                                        case EnumHelper.Actiontype.Delete:
+                                            @string.Format(Messages.UserInBusinessActivity, activity.SubEntityTypeName, "deleted", activity.createdByName);
+                                            break;
+                                    } 
                                     break;
-                                }
-                                
-                            </td>
-                        </tr>
+                            }
+                        }else{
+                                @switch (activity.Action)
+                            {
+                                case EnumHelper.Actiontype.Add:
+                                    @string.Format(Messages.BusinessActivity,"Business","added",activity.createdByName);
+                                    break;
+                                case EnumHelper.Actiontype.Update:
+                                    @string.Format(Messages.BusinessActivity,"Business","updated",activity.createdByName);
+                                    break;
+                                case EnumHelper.Actiontype.Delete:
+                                    @string.Format(Messages.BusinessActivity,"Business","deleted",activity.createdByName);
+                                    break;
+                            }
+                        }
+                    break;
+                }
+                
+            </td>
+        </tr>
     }
 }
 else

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
 
@@ -25,41 +26,40 @@ public class ViewRenderService : IViewRenderService
 
     public async Task<string> RenderToStringAsync(string viewName, object model)
     {
-        var httpContext = new DefaultHttpContext
+        DefaultHttpContext httpContext = new DefaultHttpContext
         {
             RequestServices = _serviceProvider
         };
 
-        var actionContext = new ActionContext(
+        ActionContext actionContext = new ActionContext(
             httpContext,
             new RouteData(),
             new ActionDescriptor()
         );
-        var viewResult = _viewEngine.GetView(null, viewName, false);
+        ViewEngineResult viewResult = _viewEngine.GetView(null, viewName, false);
 
         if (!viewResult.Success)
         {
             viewResult = _viewEngine.FindView(actionContext, viewName, false);
         }
-        // var viewResult = _viewEngine.FindView(actionContext, viewName, false);
 
         if (viewResult.View == null)
         {
             throw new ArgumentNullException($"{viewName} does not match any available view");
         }
 
-        using var sw = new StringWriter();
+        using StringWriter sw = new StringWriter();
 
-        var viewDictionary = new ViewDataDictionary(
+        ViewDataDictionary viewDictionary = new ViewDataDictionary(
             new EmptyModelMetadataProvider(),
             new ModelStateDictionary())
         {
             Model = model
         };
 
-        var tempData = new TempDataDictionary(httpContext, _tempDataProvider);
+        TempDataDictionary tempData = new TempDataDictionary(httpContext, _tempDataProvider);
 
-        var viewContext = new ViewContext(
+        ViewContext viewContext = new ViewContext(
             actionContext,
             viewResult.View,
             viewDictionary,

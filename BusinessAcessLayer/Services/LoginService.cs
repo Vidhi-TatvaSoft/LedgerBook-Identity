@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using BusinessAcessLayer.Constant;
 using BusinessAcessLayer.Interface;
@@ -155,14 +156,14 @@ public class LoginService : ILoginService
 
     public ApplicationUser GetUserFromTokenIdentity(string token)
     {
-        var claims = _jwttokenService.GetClaimsFromToken(token);
-        var Email = _jwttokenService.GetClaimValue(token, "email");
+        ClaimsPrincipal claims = _jwttokenService.GetClaimsFromToken(token);
+        string Email = _jwttokenService.GetClaimValue(token, "email");
         return _genericRepository.Get<ApplicationUser>(x => x.Email.ToLower().Trim() == Email.ToLower().Trim())!;
     }
     public User GetUserFromToken(string token)
     {
-        var claims = _jwttokenService.GetClaimsFromToken(token);
-        var Email = _jwttokenService.GetClaimValue(token, "email");
+        ClaimsPrincipal  claims = _jwttokenService.GetClaimsFromToken(token);
+        string  Email = _jwttokenService.GetClaimValue(token, "email");
         return _genericRepository.Get<User>(x => x.Email.ToLower().Trim() == Email.ToLower().Trim())!;
     }
 }

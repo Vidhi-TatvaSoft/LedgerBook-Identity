@@ -21,7 +21,7 @@ public class LedgerBookDbContextFactory : IDesignTimeDbContextFactory<LedgerBook
                 .AddEnvironmentVariables()
                 .Build();
 
-        var connectionString = config.GetConnectionString("LedgerbookDbConnection");
+        string connectionString = config.GetConnectionString("LedgerbookDbConnection");
 
         var optionsBuilder = new DbContextOptionsBuilder<LedgerBookDbContext>();
         optionsBuilder.UseSqlServer(connectionString);

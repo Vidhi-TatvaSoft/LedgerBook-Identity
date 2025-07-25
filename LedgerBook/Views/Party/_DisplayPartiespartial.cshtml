@@ -10,7 +10,7 @@
 }
 else
 {
-    @foreach (var party in Model)
+    @foreach (PartyViewModel party in Model)
     {
         <div class="d-flex justify-content-between border cursor-pointer p-2 party-list-div" id="party-id-@party.PartyId" title="Select party"
             onclick="displaySelectedParyDetails(@party.PartyId)" >

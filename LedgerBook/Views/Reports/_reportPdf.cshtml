@@ -230,7 +230,7 @@
                 </thead>
                 <tbody>
                     @if(Model.TransactionsList.Count != 0){
-                    @foreach(var transaction in  Model.TransactionsList){
+                    @foreach(TransactionEntryViewModel transaction in  Model.TransactionsList){
                         <tr>
                             <td class="text-center borders">@transaction.CreateDate</td>
                             <td class="text-center borders">@transaction.PartyName</td>

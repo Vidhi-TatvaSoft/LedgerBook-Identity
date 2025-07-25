@@ -338,7 +338,7 @@ public class PartyService : IPartyService
     {
         decimal amount = 0;
         List<LedgerTransactions> allEntriesOfParty = _genericRepository.GetAll<LedgerTransactions>(x => x.PartyId == partyId && !x.DeletedAt.HasValue).ToList();
-        foreach (var entry in allEntriesOfParty)
+        foreach (LedgerTransactions entry in allEntriesOfParty)
         {
             if (entry.UpdatedAt != null)
             {
@@ -393,7 +393,7 @@ public class PartyService : IPartyService
         for (int i = 0; i < EntriesList.Count; i++)
         {
             decimal amount = 0;
-            foreach (var entry in allEntriesOfParty)
+            foreach (LedgerTransactions entry in allEntriesOfParty)
             {
                 if (entry.CreatedAt <= EntriesList[i].CreatedAt)
                 {

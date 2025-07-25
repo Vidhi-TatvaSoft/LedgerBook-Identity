@@ -50,7 +50,7 @@ public class CommonMethods
         string fileName = Guid.NewGuid() + "_" + file.FileName;
         string filePath = Path.Combine(folderPath, fileName);
 
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        using (FileStream stream = new FileStream(filePath, FileMode.Create))
         {
             file.CopyTo(stream);
         }
@@ -124,7 +124,6 @@ public class CommonMethods
     public static async Task<bool> UpdateRoleEmail(string Email, string Role, string Business, string loginLink)
     {
         string subject = Constant.ConstantVariables.RoleUpdatedSubject;
-        // var loginLink = Url.Action("Index", "Business");
         string body = Constant.EmailTemplates.GetRoleUpdatedEmailTemplate(
             userName: Email,
             role: Role,

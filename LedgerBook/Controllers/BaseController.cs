@@ -3,6 +3,7 @@ using BusinessAcessLayer.Interface;
 using DataAccessLayer.Constant;
 using DataAccessLayer.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LedgerBook.Controllers;
 
@@ -67,7 +68,7 @@ public class BaseController : Controller
     #region render to login page if not authorized
     protected IActionResult RedirectToLoginIfNotAuthenticated()
     {
-        var token = Request.Cookies[TokenKey.UserToken];
+        string token = Request.Cookies[TokenKey.UserToken];
         if (Request.Cookies[TokenKey.UserToken] == null)
         {
             return RedirectToAction("Login", "Login");
@@ -76,10 +77,10 @@ public class BaseController : Controller
     }
     #endregion
 
-     #region render to login page if not authorized
+    #region render to login page if not authorized
     protected IActionResult RedirectToIndexIfBusinessNotFound()
     {
-        var token = Request.Cookies[TokenKey.BusinessToken];
+        string token = Request.Cookies[TokenKey.BusinessToken];
         if (Request.Cookies[TokenKey.BusinessToken] == null)
         {
             return RedirectToAction("Index", "Business");
@@ -103,6 +104,15 @@ public class BaseController : Controller
     protected async Task<ActivityLogs> SetActivityLog(string message, EnumHelper.Actiontype action, EnumHelper.ActivityEntityType entityType, int EntityTypeId, int? createdById = null, EnumHelper.ActivityEntityType? subEntityType = null, int? subEntityTypeId = null)
     {
         return await _activityLogService.SetActivityLog(message, action, entityType, EntityTypeId, createdById, subEntityType, subEntityTypeId);
+    }
+    #endregion
+
+    #region fill view bag for category, type
+    protected void SetViewBag(List<ReferenceDataValues>? categories = null, List<ReferenceDataValues>? Types = null)
+    {
+        ViewBag.Categories = new SelectList(categories, "Id", "EntityValue");
+        ViewBag.Types = new SelectList(Types, "Id", "EntityValue");
+        return;
     }
     #endregion
 }

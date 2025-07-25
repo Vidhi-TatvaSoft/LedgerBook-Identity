@@ -90,7 +90,7 @@ public class UserController : BaseController
                 _cookieService.SetCookie(Response, TokenKey.ProfilePhoto, attachmentViewModel.BusinesLogoPath);
                 _cookieService.SetCookie(Response, TokenKey.UserName, updatedUser.FirstName + " " + updatedUser.LastName);
             }
-            TempData["SuccessMessage"] = Messages.GlobalAddUpdateMesage.Replace("{name}", "User Profile").Replace("{status}", "Updated");
+            TempData["SuccessMessage"] = string.Format(Messages.GlobalAddUpdateMesage, "User Profile", "Updated");
             string partyType = _cookieService.GetCookie(Request, TokenKey.PartyType);
             if (partyType != null)
             {
@@ -103,7 +103,7 @@ public class UserController : BaseController
         }
         else
         {
-            TempData["ErrorMessage"] = Messages.GlobalAddUpdateFailMessage.Replace("{name}", "User Profile").Replace("{status}", "Update");
+            TempData["ErrorMessage"] = string.Format(Messages.GlobalAddUpdateFailMessage, "update", "user Profile");
             return RedirectToAction("Profile");
 
         }
@@ -146,11 +146,11 @@ public class UserController : BaseController
                 {
                     string loginLink = Url.Action("Login", "Login", new { }, Request.Scheme);
                     _ = CommonMethods.ChangePasswordEmail(user.Email, user.FirstName + " " + user.LastName, loginLink);
-                    return Json(new { success = true, message = Messages.GlobalAddUpdateMesage.Replace("{name}", "Password").Replace("{status}", "updated") });
+                    return Json(new { success = true, message = string.Format(Messages.GlobalAddUpdateMesage, "Password", "updated") });
                 }
                 else
                 {
-                    return Json(new { success = false, message = Messages.GlobalAddUpdateFailMessage.Replace("{name}", "Password").Replace("{status}", "update") });
+                    return Json(new { success = false, message = string.Format(Messages.GlobalAddUpdateFailMessage, "update", "password") });
                 }
             }
         }

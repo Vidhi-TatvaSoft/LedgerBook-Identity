@@ -288,16 +288,10 @@
         }
         let businessNameDropdown = document.getElementById("businessNameDropdown");
         nameIdObject.forEach(item => {
-            @* businessNameDropdown.innerHTML += `<li><div class="dropdown-item text-dark cursor-pointer" onclick='ChangeBusiness(${item.value})'>${item.text}</div></li>` *@
-                businessNameDropdown.innerHTML += `<option value="${item.value}" class="hover-class cursor-pointer" onclick='ChangeBusiness(${item.value})'>${item.text}</option>`
-            @* const option = document.createElement('option');
-            option.value = item.value;
-            option.textContent = item.text;
-            option.classList.add("hover-class")
-            businessNameDropdown.appendChild(option); *@
+            businessNameDropdown.innerHTML += `<option value="${item.value}" class="hover-class cursor-pointer" onclick='ChangeBusiness(${item.value})'>${item.text}</option>`
+
         });
         document.getElementById("businessNameDropdown").value = currentBusinessId
-        @* document.getElementById("businessNameDropdown"). *@
 
     }
 
@@ -309,85 +303,28 @@
         console.log("hiii")
     }
 
-    @* $(document).on("click", '.hover-class',function (e) {
-        if (e.which === 1) {console.log("left") } 
-        else if (e.which === 3) {console.log("right") } 
-    }) *@
-
-        $('#businessNameDropdown').change(function () {
-            console.log(this.value)
-            $.ajax({
-                url: "/Business/SetBusinessToken",
-                type: "POST",
-                data: { businessId: this.value },
-                success: function (response) {
-                    if (response.success) {
-                        window.location = "/Party/CheckRolePermission"
-                    } else {
-                        Toaster("Not set cookie")
-                    }
-                }
-            })
-        });
-
-    function AjaxResponseHandle(response) {
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(response, 'text/html');
-        var title = doc.title;
-        if (title === "Login - LedgerBook" || title === "Register - LedgerBook") {
-            window.location.href = '@Url.Action("Login", "Login")';
-        } else if (title === "Business - LedgerBook") {
-            window.location.href = '@Url.Action("Index", "Business")';
-        } else if (title === "View Business - LedgerBook" || "Party Report - LedgerBook") {
-            window.location.href = '@Url.Action("CheckRolePermission", "Party")';
-        }
-        else if (title === "InternalServerError" || title === "Forbidden" || title === "Unauthorize" || title === "PageNotFoundError") {
-            var url = `/ErrorPage/${title}`;
-            window.location.href = url;
-        }
-        else if (title === "InternalServerError - LedgerBook" || title === "Forbidden - LedgerBook" || title === "Unauthorize - LedgerBook" || title === "PageNotFoundError - LedgerBook") {
-            var url = `/ErrorPage/${title.split(" ")[0].toString().trim()}`;
-            window.location.href = url;
-        }
-        else {
-            errorToaster('Unexpected response format.');
-        }
-    }
-
-    function IsHtmlDoc(response) {
-        if (response.statusCode) {
-            return;
-        }
-        if ((response.trim().indexOf('<!DOCTYPE html>') === 0) || (response.trim().indexOf('<html>') === 0)) {
-            AjaxResponseHandle(response);
-        }
-    }
-
-    function HandleResponse(response, replacePartialViewId) {
-        if (response) {
-            if (response.redirectUrl) {
-                window.location.href = response.redirectUrl;
-            } else {
-                $(replacePartialViewId).html(response.html);
-            }
-            if (response.message) {
-                if (response.errorType == 1) {
-                    Toaster(response.message);
+    $('#businessNameDropdown').change(function () {
+        console.log(this.value)
+        $.ajax({
+            url: "/Business/SetBusinessToken",
+            type: "POST",
+            data: { businessId: this.value },
+            success: function (response) {
+                if (response.success) {
+                    window.location = "/Party/CheckRolePermission"
                 } else {
-                    Toaster(response.message, "error");
+                    Toaster("Not set cookie")
                 }
             }
-        }
-    }
-
-
+        })
+    });
 
     $(document).ready(function () {
         // 1. Show toaster if TempData contains error (normal request)
 
         // 2. Global AJAX error catcher
         $(document).ajaxComplete(function (event, xhr, settings) {
-            AjaxComplete(event,xhr,settings);
+            AjaxComplete(event, xhr, settings);
         });
 
     });

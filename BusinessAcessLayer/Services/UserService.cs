@@ -61,7 +61,7 @@ public class UserService : IUserService
         user.IsUserRegistered = false;
         user.CreatedAt = DateTime.UtcNow;
         userViewmodel.Pasword = ConstantVariables.BasicPassword;
-        var result = await _userManager.CreateAsync(user, userViewmodel.Pasword);
+        IdentityResult result = await _userManager.CreateAsync(user, userViewmodel.Pasword);
 
         if (result.Succeeded)
         {
@@ -137,7 +137,7 @@ public class UserService : IUserService
             user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, resetPasswordViewModel.Password);
             user.UpdatedAt = DateTime.UtcNow;
             user.UpdatedById = user.Id;
-            var result = await _userManager.UpdateAsync(user);
+            IdentityResult result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
                 return true;
@@ -203,7 +203,7 @@ public class UserService : IUserService
             }
             user.UpdatedAt = DateTime.UtcNow;
             user.UpdatedById = user.Id;
-            var result = await _userManager.UpdateAsync(user);
+            IdentityResult result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
                 string message = string.Format(Messages.BusinessActivity, "User", "updated", user.FirstName + " " + user.LastName);

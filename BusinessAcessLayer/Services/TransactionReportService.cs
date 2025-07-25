@@ -108,7 +108,7 @@ public class TransactionReportService : ITransactionReportSevice
         for (int i = 0; i < EntriesList.Count; i++)
         {
             decimal amount = 0;
-            foreach (var entry in allEntriesOfParty)
+            foreach (LedgerTransactions entry in allEntriesOfParty)
             {
                 if (entry.CreatedAt <= EntriesList[i].CreatedAt)
                 {
@@ -164,12 +164,12 @@ public class TransactionReportService : ITransactionReportSevice
     {
         // Create Excel package
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-        using (var package = new ExcelPackage())
+        using (ExcelPackage package = new ExcelPackage())
         {
-            var worksheet = package.Workbook.Worksheets.Add("Transactions");
-            var currentRow = 1;
-            var currentCol = 1;
-            // var colorsforExcel = System.Drawing.Color;
+            ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Transactions");
+            int currentRow = 1;
+            int currentCol = 1;
+
             // this is first row....................................
             worksheet.Cells[currentRow, currentCol, currentRow, currentCol + 2].Merge = true;
             worksheet.Cells[currentRow, currentCol].Value = reportExcel.Businessname;
@@ -241,7 +241,7 @@ public class TransactionReportService : ITransactionReportSevice
             int count = 1;
             if (reportExcel.TransactionsList.Count != 0)
             {
-                foreach (var transaction in reportExcel.TransactionsList)
+                foreach (TransactionEntryViewModel transaction in reportExcel.TransactionsList)
                 {
                     int startCol = 1;
 

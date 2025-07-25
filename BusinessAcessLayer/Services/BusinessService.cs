@@ -11,6 +11,7 @@ using Org.BouncyCastle.Utilities;
 using System.Transactions;
 using BusinessAcessLayer.Constant;
 using System.Linq.Expressions;
+using System.Security.Claims;
 
 namespace BusinessAcessLayer.Services;
 
@@ -55,7 +56,7 @@ public class BusinessService : IBusinessService
 
     public List<BusinessViewModel> GetBusinesses(int userId, string searchText = null)
     {
-        var query = _genericRepository.GetAll<UserBusinessMappings>(predicate: ubm => ubm.UserId == userId && ubm.DeletedAt == null && ubm.IsActive,
+        IEnumerable<UserBusinessMappings> query = _genericRepository.GetAll<UserBusinessMappings>(predicate: ubm => ubm.UserId == userId && ubm.DeletedAt == null && ubm.IsActive,
                 thenIncludes: new List<Func<IQueryable<UserBusinessMappings>, IQueryable<UserBusinessMappings>>>
                 {
                    x => x.Include(ubm => ubm.Business)
@@ -93,8 +94,8 @@ public class BusinessService : IBusinessService
 
         return businesses.Select(data =>
         {
-            var business = data.First();
-            var ownerNames = _genericRepository.GetAll<UserBusinessMappings>(predicate: x => x.BusinessId == data.Key && x.Role.RoleName == Constant.ConstantVariables.OwnerRole && x.DeletedAt == null && x.IsActive,
+            UserBusinessMappings business = data.First();
+            List<string> ownerNames = _genericRepository.GetAll<UserBusinessMappings>(predicate: x => x.BusinessId == data.Key && x.Role.RoleName == Constant.ConstantVariables.OwnerRole && x.DeletedAt == null && x.IsActive,
                     includes: new List<Expression<Func<UserBusinessMappings, object>>>
                     {
                         x => x.User
@@ -102,7 +103,7 @@ public class BusinessService : IBusinessService
                     ).Select(x => x.User.FirstName + " " + x.User.LastName)
                         .ToList();
 
-            var ownerIds = _genericRepository.GetAll<UserBusinessMappings>(predicate: x => x.BusinessId == data.Key && x.Role.RoleName == Constant.ConstantVariables.OwnerRole && x.DeletedAt == null && x.IsActive,
+            List<int> ownerIds = _genericRepository.GetAll<UserBusinessMappings>(predicate: x => x.BusinessId == data.Key && x.Role.RoleName == Constant.ConstantVariables.OwnerRole && x.DeletedAt == null && x.IsActive,
                     includes: new List<Expression<Func<UserBusinessMappings, object>>>
                     {
                         x => x.User
@@ -137,7 +138,7 @@ public class BusinessService : IBusinessService
                     int mainOwnerId = mainOwner.FirstOrDefault().UserId;
                     string[] userIdstring = business.OwnerId.Split(",");
                     List<int> userIds = new();
-                    foreach (var id in userIdstring)
+                    foreach (string id in userIdstring)
                     {
                         userIds.Add(Int32.Parse(id));
                     }
@@ -318,7 +319,7 @@ public class BusinessService : IBusinessService
 
     public Businesses GetBusinessFromToken(string token)
     {
-        var claims = _jwttokenService.GetClaimsFromToken(token);
+        ClaimsPrincipal claims = _jwttokenService.GetClaimsFromToken(token);
         int businessId = int.Parse(_jwttokenService.GetClaimValue(token, "id"));
         return _genericRepository.Get<Businesses>(b => b.Id == businessId && b.DeletedAt == null);
     }
@@ -393,7 +394,7 @@ public class BusinessService : IBusinessService
     public List<BusinessViewModel> GetAllBusinesses(int userId)
     {
         int OwnerRoleId = _genericRepository.Get<Role>(x => x.RoleName == ConstantVariables.OwnerRole).Id;
-        var query = _genericRepository.GetAll<UserBusinessMappings>(predicate: ubm => ubm.UserId == userId && ubm.RoleId == OwnerRoleId && (ubm.CreatedById == userId || (!ubm.DeletedAt.HasValue && ubm.IsActive)),
+        IEnumerable<UserBusinessMappings> query = _genericRepository.GetAll<UserBusinessMappings>(predicate: ubm => ubm.UserId == userId && ubm.RoleId == OwnerRoleId && (ubm.CreatedById == userId || (!ubm.DeletedAt.HasValue && ubm.IsActive)),
                 thenIncludes: new List<Func<IQueryable<UserBusinessMappings>, IQueryable<UserBusinessMappings>>>
                 {
                    x => x.Include(ubm => ubm.Business)
@@ -411,7 +412,7 @@ public class BusinessService : IBusinessService
 
         return businesses.Select(data =>
                 {
-                    var business = data.First();
+                    UserBusinessMappings business = data.First();
 
                     return new BusinessViewModel
                     {

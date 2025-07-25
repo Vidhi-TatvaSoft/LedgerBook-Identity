@@ -90,7 +90,7 @@ public class ReportsController : BaseController
         ReportTransactionEntriesViewModel reportpdf = _transactionReportService.GetReportdata(partytype, timePeriod, business.Id, searchPartyId, startDate, endDate);
         // return PartialView("_reportpdf", reportpdf);
 
-        var generatedpdf = new ViewAsPdf("_reportpdf", reportpdf)
+        ViewAsPdf generatedpdf = new ViewAsPdf("_reportpdf", reportpdf)
         {
             FileName = "TransactionReport_" + reportpdf.Startdate + "_to_" + reportpdf.EndDate + ".pdf",
             PageMargins = new Rotativa.AspNetCore.Options.Margins(0, 0, 0, 0)
@@ -104,12 +104,12 @@ public class ReportsController : BaseController
     {
 
         Businesses business = GetBusinessFromToken();
-         if (business == null)
+        if (business == null)
             return RedirectToAction("Index", "Business");
         ReportTransactionEntriesViewModel reportExcel = _transactionReportService.GetReportdata(partytype, timePeriod, business.Id, searchPartyId, startDate, endDate);
 
-        var FileData = await _transactionReportService.ExportData(reportExcel);
-        var result = new FileContentResult(FileData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        byte[] FileData = await _transactionReportService.ExportData(reportExcel);
+        FileContentResult result = new FileContentResult(FileData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         {
             FileDownloadName = "TransactionReport_" + reportExcel.Startdate + "_to_" + reportExcel.EndDate + ".xlsx"
         };

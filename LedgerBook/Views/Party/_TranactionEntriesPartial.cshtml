@@ -58,7 +58,7 @@ else
     </div>
 
     <div class="p-0 transaction-entry-scroll">
-        @foreach (var entry in Model.TransactionsList)
+        @foreach (TransactionEntryViewModel entry in Model.TransactionsList)
         {
             <div class="row border-bottom p-2 mt-2 cursor-pointer" data-bs-toggle="modal" title="Update transaction"
                 data-bs-target="#transaction-entry-modal" onclick="displayUpdateTransactionModal(@entry.TransactionId)">

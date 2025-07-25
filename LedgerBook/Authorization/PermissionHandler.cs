@@ -30,7 +30,7 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
 
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
     {
-        var httpContext = _httpContextAccessor.HttpContext;
+        HttpContext httpContext = _httpContextAccessor.HttpContext;
         string cookieSavedToken = httpContext.Request.Cookies[TokenKey.UserToken];
 
         ApplicationUser user = _loginService.GetUserFromTokenIdentity(cookieSavedToken);
